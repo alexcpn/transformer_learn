@@ -12,7 +12,7 @@ tokenizer.pad_token = tokenizer.eos_token
 
 # Read the cleaned input text
 # original data Canon Camera manual https://gdlp01.c-wss.com/gds/0/0300004730/02/eosrt3-eos1100d-im2-c-en.pdf
-input_file_path = './data/clean1.txt'
+input_file_path = './data/clean2.txt'
 with open(input_file_path, 'r') as f:
     input_text = f.read()
 print(f"length of dataset in words: {len(input_text):,}") #252,023
