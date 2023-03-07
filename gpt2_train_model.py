@@ -4,26 +4,38 @@ import torch
 import shutil
 from utils import get_batch
 from transformers import  get_linear_schedule_with_warmup # for training
+import logging as log
+from datetime import datetime
+
+outfile = "./training/training_" + str(datetime.now()) +".log"
+log.basicConfig(
+    level=log.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        log.FileHandler(outfile),
+        log.StreamHandler()
+    ]
+)
 
 model_name = 'gpt2'
 tokenizer = GPT2Tokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token
-#printTokenizerDetails(tokenizer) # model_max_length: 1024 # vocab_size: 50257
+#log.info(TokenizerDetails(tokenizer) # model_max_length: 1024 # vocab_size: 50257
 
 # Read the cleaned input text
 # original data Canon Camera manual https://gdlp01.c-wss.com/gds/0/0300004730/02/eosrt3-eos1100d-im2-c-en.pdf
-input_file_path = './data/clean2.txt'
+input_file_path = './data/clean2.txt' # manually cleaned the indices part
 with open(input_file_path, 'r') as f:
     input_text = f.read()
-print(f"length of dataset in words: {len(input_text):,}") #252,023
+log.info(f"length of dataset in words: {len(input_text):,}") #252,023
 
 encoding = tokenizer(input_text, truncation=False, padding=True,return_tensors='pt')
-print(f"encoding.input_ids.shape {encoding.input_ids.shape}")
+log.info(f"encoding.input_ids.shape {encoding.input_ids.shape}")
 #encoding.input_ids.shape torch.Size([1, 48735])
 
-print(f"encoding.attention_mask.shape {encoding.attention_mask.shape}")
+log.info(f"encoding.attention_mask.shape {encoding.attention_mask.shape}")
 len_train_data = encoding.input_ids.shape[1]
-print(f"len_train_data = {len_train_data}")
+log.info(f"len_train_data = {len_train_data}")
 
  # flatten the tensor from  torch.Size([1, 48735]) to  torch.Size([48735])
 input_ids=encoding.input_ids.view(-1)
@@ -76,7 +88,7 @@ lr_scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps, num_
 
 model.train()
 for epoch in range(num_train_epochs):
-    print(f"Epoch {epoch+1} of {num_train_epochs}")
+    log.info(f"Epoch {epoch+1} of {num_train_epochs}")
     epoch_loss = 0
     for i in range(0,len_train_data, block_size):
         # do the batch size manipulation here
@@ -96,7 +108,7 @@ for epoch in range(num_train_epochs):
         optimizer.step()
         lr_scheduler.step()
         optimizer.zero_grad()
-    print(f"Epoch {epoch} complete. Loss: {loss.item()}")
+    log.info(f"Epoch {epoch} complete. Loss: {loss.item()}")
     # Save the model checkpoint every 10th
     checkpoint_dir = f"./training/{model_name}-epoch-{epoch+1}"
     model.save_pretrained(checkpoint_dir)
