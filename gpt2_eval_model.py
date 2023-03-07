@@ -1,12 +1,27 @@
+"""
+Evaluate the trained model
+"""
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import torch
+import logging as log
+from datetime import datetime
+
+outfile = "./training/output_" + str(datetime.now()) +".log"
+log.basicConfig(
+    level=log.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        log.FileHandler(outfile)
+        #log.StreamHandler() # only to file
+    ]
+)
 
 # Fine-tune the model on the training data
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the model from the saved checkpoint directory
 checkpoint_dir ='./training/gpt2-epoch-50-7:54-4-6'
-checkpoint_dir ='./training/gpt2-epoch-50-clean2' #Epoch 49 complete. Loss: 0.07775882631540298
+checkpoint_dir ='./training/gpt2-epoch-50 2023-03-07 11:13:46.62'  #Loss: 0.06946726143360138
 #checkpoint_dir ='./training/gpt2-epoch-100' #Epoch 49 complete. Loss: 0.07775882631540298
 
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2',model_max_length=1024)
@@ -18,7 +33,8 @@ model.eval()
 
 
 # Use the fine-tuned model to answer a question
-question = "How to shoot at night?"
+#question = "How to shoot at night?"
+log.info(f"Model name {checkpoint_dir}")
 print(f"Model name {checkpoint_dir}")
 from termcolor import  cprint
 while True:
@@ -39,6 +55,9 @@ while True:
       cprint(f"Question: {question}\n", 'green')
       cprint(f"Generated\n", 'cyan') 
       cprint(f"{answer}\n", 'blue') 
+      log.info(f"Question: {question}")
+      log.info(f"Generated: {answer}") 
+      
 
 
 
