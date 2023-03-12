@@ -32,6 +32,8 @@ tokenizer.pad_token = tokenizer.eos_token
 #log.info(TokenizerDetails(tokenizer) # model_max_length: 1024 # vocab_size: 50257
 
 # Read the cleaned input text
+# original data Canon Camera manual https://gdlp01.c-wss.com/gds/0/0300004730/02/eosrt3-eos1100d-im2-c-en.pdf
+input_file_path = './data/clean2.txt' # manually cleaned the indices part
 input_file_path = './data/small.txt' # a very small training file to learn
 with open(input_file_path, 'r') as f:
     input_text = f.read()
@@ -39,12 +41,10 @@ log.info(f"length of dataset in words: {len(input_text):,}") #252,023
 
 encoding = tokenizer(input_text, truncation=False, padding=True,return_tensors='pt')
 log.info(f"encoding.input_ids.shape {encoding.input_ids.shape}")
-#encoding.input_ids.shape torch.Size([1, 6])
-
 log.info(f"encoding.attention_mask.shape {encoding.attention_mask.shape}")
 len_train_data = encoding.input_ids.shape[1]
 log.info(f"len_train_data = {len_train_data}")
-# len_train_data = 6
+
  # flatten the tensor from  torch.Size([1, 6]) to  torch.Size([48735])
 input_ids=encoding.input_ids.view(-1)
 attention_mask=encoding.attention_mask.view(-1)
@@ -75,6 +75,13 @@ for parameter in model.lm_head.parameters():
 
 # Fine-tune the model on the training data
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# # We could optimize training using Pytorch 2.0
+# # It neds cuda 11.6+ ,  it crashes as of now
+# if int(re.search(r'\d+', torch.__version__).group()) >= 2:
+#     # for pytorch 2.0
+#     model =torch.compile(model)
+#     log.info(f"Compiled the model for speed up")
 
 model.to(device)
 # learning_rate = 6e-4 # ??
@@ -117,10 +124,10 @@ for epoch in range(num_train_epochs):
     model.save_pretrained(checkpoint_dir)
     log.info(f"Epoch {epoch} complete. Loss: {loss.item()} saving {checkpoint_dir}")
     # delete the previous save epoch
-    # checkpoint_dir = f"./model/{model_name}-epoch-{epoch}-{time_hash}"
-    # try:
-    #     shutil.rmtree(checkpoint_dir)
-    # except:
-    #     pass
+    checkpoint_dir = f"./model/{model_name}-epoch-{epoch}-{time_hash}"
+    try:
+        shutil.rmtree(checkpoint_dir)
+    except:
+        pass
 
 

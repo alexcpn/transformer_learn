@@ -76,26 +76,8 @@ def get_batch(len_train_data,input_ids,attention_mask,device,block_size=1024,
     ix = torch.randint(0,len_train_data-block_size , (batch_size,)) # random select from training data set
     x = torch.stack([(input_ids[i:i+block_size]) for i in ix])
     y = torch.stack([((attention_mask[i:i+block_size])) for i in ix])
-    print(x.shape,x)
-    # # for small.txt
-    # torch.Size([10, 5]) tensor([[14618,   284,   968,  1971,  2254],
-    #     [14618= Welcome,   284=to,   968=New,  1971=York,  2254=City],
-    #     [14618,   284,   968,  1971,  2254],
-    #     [14618,   284,   968,  1971,  2254],
-    #     [14618,   284,   968,  1971,  2254],
-    #     [14618,   284,   968,  1971,  2254],
-    #     [14618,   284,   968,  1971,  2254],
-    #     [14618,   284,   968,  1971,  2254],
-    #     [14618,   284,   968,  1971,  2254],
-    #     [14618,   284,   968,  1971,  2254]])
-    # # trying with a random attention mask - See denoising https://github.com/huggingface/transformers/blob/main/examples/flax/language-modeling/run_t5_mlm_flax.py
-    # this should also match the label
-    #  # Create a numpy array with random integers of either 0 or 1
-    # arr = np.random.randint(2, size=(block_size))
-    # # Convert the numpy array to a PyTorch tensor
-    # tensor = torch.tensor(arr)
-    # y = torch.stack([(tensor) for i in range(batch_size)])
-
+    # trying with a random attention mask -
+    # ToDo denoising https://github.com/huggingface/transformers/blob/main/examples/flax/language-modeling/run_t5_mlm_flax.py
     if device_type == 'cuda':
         # pin arrays x,y, which allows us to move them to GPU asynchronously (non_blocking=True)
         x, y = x.pin_memory().to(device, non_blocking=True), y.pin_memory().to(device, non_blocking=True)
