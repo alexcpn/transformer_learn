@@ -1,0 +1,24 @@
+2023-03-12 16:02:20,604 [INFO] length of dataset in words: 25
+2023-03-12 16:02:20,605 [INFO] encoding.input_ids.shape torch.Size([1, 6])
+2023-03-12 16:02:20,605 [INFO] encoding.attention_mask.shape torch.Size([1, 6])
+2023-03-12 16:02:20,605 [INFO] len_train_data = 6
+2023-03-12 16:02:29,300 [INFO] Epoch 1 of 10
+2023-03-12 16:02:33,840 [INFO] Epoch 0 complete. Loss: 2.050997257232666 saving ./test/gpt2-epoch-1-2023-03-12 16:02:19.289492
+2023-03-12 16:02:33,841 [INFO] Epoch 2 of 10
+2023-03-12 16:02:40,668 [INFO] Epoch 1 complete. Loss: 0.9983710050582886 saving ./test/gpt2-epoch-2-2023-03-12 16:02:19.289492
+2023-03-12 16:02:40,668 [INFO] Epoch 3 of 10
+2023-03-12 16:02:47,335 [INFO] Epoch 2 complete. Loss: 0.6468631029129028 saving ./test/gpt2-epoch-3-2023-03-12 16:02:19.289492
+2023-03-12 16:02:47,335 [INFO] Epoch 4 of 10
+2023-03-12 16:02:54,139 [INFO] Epoch 3 complete. Loss: 0.10516931116580963 saving ./test/gpt2-epoch-4-2023-03-12 16:02:19.289492
+2023-03-12 16:02:55,235 [INFO] Epoch 5 of 10
+2023-03-12 16:03:00,523 [INFO] Epoch 4 complete. Loss: 0.12404444068670273 saving ./test/gpt2-epoch-5-2023-03-12 16:02:19.289492
+2023-03-12 16:03:00,524 [INFO] Epoch 6 of 10
+2023-03-12 16:03:07,068 [INFO] Epoch 5 complete. Loss: 0.10215222835540771 saving ./test/gpt2-epoch-6-2023-03-12 16:02:19.289492
+2023-03-12 16:03:07,068 [INFO] Epoch 7 of 10
+2023-03-12 16:03:13,447 [INFO] Epoch 6 complete. Loss: 0.0014888814184814692 saving ./test/gpt2-epoch-7-2023-03-12 16:02:19.289492
+2023-03-12 16:03:13,448 [INFO] Epoch 8 of 10
+2023-03-12 16:03:20,579 [INFO] Epoch 7 complete. Loss: 0.18975284695625305 saving ./test/gpt2-epoch-8-2023-03-12 16:02:19.289492
+2023-03-12 16:03:20,985 [INFO] Epoch 9 of 10
+2023-03-12 16:03:27,655 [INFO] Epoch 8 complete. Loss: 0.3775772750377655 saving ./test/gpt2-epoch-9-2023-03-12 16:02:19.289492
+2023-03-12 16:03:27,655 [INFO] Epoch 10 of 10
+2023-03-12 16:03:34,140 [INFO] Epoch 9 complete. Loss: 6.827305332990363e-05 saving ./test/gpt2-epoch-10-2023-03-12 16:02:19.289492
