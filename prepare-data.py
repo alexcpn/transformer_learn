@@ -15,7 +15,7 @@ def cleanFile(fileNameIn, fileNameOut):
 
     with open(fileNameOut, 'w') as write_file:
         for line in lines:
-            if len(line) < 7:
+            if len(line) < 3:
                 pass
             else:
                 tokens = word_tokenize(line)

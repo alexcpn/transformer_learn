@@ -24,7 +24,7 @@ checkpoint_dir ='./training/gpt2-epoch-50-7:54-4-6'
 checkpoint_dir ='./training/gpt2-epoch-50 2023-03-07 11:13:46.62'  # # Unfreeze 6: Loss: 0.06946726143360138
 #checkpoint_dir ='./training/gpt2-epoch-200-2023-03-08 20:00:21.576489' # Unfreeze 4: Loss: 0.0677826926112175
 #checkpoint_dir ='./training/gpt2-epoch-1000-2023-03-08 22:19:56.069333'# tain all layers: Loss: 0.040
-checkpoint_dir ='./model/gpt2-epoch-5-2023-03-10 09:56:27.395044' #.74
+checkpoint_dir ='./test-gpt2/gpt2-epoch-50-2023-03-15 18:28:40.386832' #.74
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2',model_max_length=1024)
 #tokenizer.pad_token = tokenizer.eos_token
 
