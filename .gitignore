@@ -4,3 +4,5 @@ model/*
 test/*
 good_model/*
 torch_compile*
+minifierout.zip
+test-**/
