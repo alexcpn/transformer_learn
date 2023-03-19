@@ -30,33 +30,3 @@ print(encoding.attention_mask.shape)
 
 block_size = tokenizer.model_max_length # 1024
 
-import sys
-sys.exit(0)
-
-# If we need to run the model through a large encoding - see below
-
-# Set the window size and stride
-window_size = 512
-stride = 256
-
-# Split the input text into overlapping windows
-windows = []
-start = 0
-while start < len(input_text):
-    end = start + window_size
-    if end >= len(input_text):
-        end = len(input_text)
-    windows.append(input_text[start:end])
-    start += stride
-
-# Encode each window separately and concatenate the embeddings
-embeddings = []
-for window in windows:
-    encoding = tokenizer(window, truncation=True, padding=True,return_tensors='pt')
-    with torch.no_grad():
-        output = model(**encoding)
-    embeddings.append(output.last_hidden_state[:, 0, :])
-concatenated_embeddings = torch.cat(embeddings, axis=1)
-
-# Print the shape of the concatenated embeddings
-print(concatenated_embeddings.shape)
