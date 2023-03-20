@@ -1,0 +1,111 @@
+2023-03-19 22:18:13,083 [INFO] Training data ./data/17921-0-cleaned.txt
+2023-03-19 22:18:13,084 [INFO] length of dataset in words: 1,150,087
+2023-03-19 22:18:13,774 [INFO] encoding.input_ids.shape torch.Size([1, 286158])
+2023-03-19 22:18:13,774 [INFO] encoding.attention_mask.shape torch.Size([1, 286158])
+2023-03-19 22:18:13,774 [INFO] length of dataset in tokens = 286158
+2023-03-19 22:18:26,448 [INFO] Un-freezed layer 8 for training
+2023-03-19 22:18:26,449 [INFO] Un-freezed layer 9 for training
+2023-03-19 22:18:26,449 [INFO] Un-freezed layer 10 for training
+2023-03-19 22:18:26,449 [INFO] Un-freezed layer 11 for training
+2023-03-19 22:18:28,241 [INFO] Over-fit check answer: When was Gandhi born? When was Gandhi born? When was Gandhi born? When was Gandhi born? When was Gandhi born?
+2023-03-19 22:18:28,243 [INFO] len_train_data=286158 block_size =64 batch_size= 8
+2023-03-19 22:18:28,244 [INFO] Epoch 1 of 50
+2023-03-19 22:28:09,740 [INFO] Epoch 0 complete. Loss: 1.2622103691101074 saving ./test2-t5/t5-base-epoch-1-2023-03-19 22:18:10.872373
+2023-03-19 22:28:09,740 [INFO] Epoch 2 of 50
+2023-03-19 22:37:57,252 [INFO] Epoch 1 complete. Loss: 0.8648402690887451 saving ./test2-t5/t5-base-epoch-2-2023-03-19 22:18:10.872373
+2023-03-19 22:37:57,336 [INFO] Epoch 3 of 50
+2023-03-19 22:47:46,932 [INFO] Epoch 2 complete. Loss: 1.2108712196350098 saving ./test2-t5/t5-base-epoch-3-2023-03-19 22:18:10.872373
+2023-03-19 22:47:47,498 [INFO] Epoch 4 of 50
+2023-03-19 22:57:33,566 [INFO] Epoch 3 complete. Loss: 0.6225958466529846 saving ./test2-t5/t5-base-epoch-4-2023-03-19 22:18:10.872373
+2023-03-19 22:57:33,644 [INFO] Epoch 5 of 50
+2023-03-19 23:07:21,227 [INFO] Epoch 4 complete. Loss: 0.6509684324264526 saving ./test2-t5/t5-base-epoch-5-2023-03-19 22:18:10.872373
+2023-03-19 23:07:21,302 [INFO] Epoch 6 of 50
+2023-03-19 23:17:07,641 [INFO] Epoch 5 complete. Loss: 0.6851136088371277 saving ./test2-t5/t5-base-epoch-6-2023-03-19 22:18:10.872373
+2023-03-19 23:17:07,727 [INFO] Epoch 7 of 50
+2023-03-19 23:26:56,604 [INFO] Epoch 6 complete. Loss: 1.0033495426177979 saving ./test2-t5/t5-base-epoch-7-2023-03-19 22:18:10.872373
+2023-03-19 23:26:56,685 [INFO] Epoch 8 of 50
+2023-03-19 23:36:45,528 [INFO] Epoch 7 complete. Loss: 0.6934680342674255 saving ./test2-t5/t5-base-epoch-8-2023-03-19 22:18:10.872373
+2023-03-19 23:36:45,617 [INFO] Epoch 9 of 50
+2023-03-19 23:46:33,524 [INFO] Epoch 8 complete. Loss: 0.6493489742279053 saving ./test2-t5/t5-base-epoch-9-2023-03-19 22:18:10.872373
+2023-03-19 23:46:33,600 [INFO] Epoch 10 of 50
+2023-03-19 23:56:23,513 [INFO] Epoch 9 complete. Loss: 0.6693357229232788 saving ./test2-t5/t5-base-epoch-10-2023-03-19 22:18:10.872373
+2023-03-19 23:56:23,593 [INFO] Epoch 11 of 50
+2023-03-20 00:06:11,500 [INFO] Epoch 10 complete. Loss: 0.8150444626808167 saving ./test2-t5/t5-base-epoch-11-2023-03-19 22:18:10.872373
+2023-03-20 00:06:11,568 [INFO] Epoch 12 of 50
+2023-03-20 00:16:02,781 [INFO] Epoch 11 complete. Loss: 0.7083155512809753 saving ./test2-t5/t5-base-epoch-12-2023-03-19 22:18:10.872373
+2023-03-20 00:16:02,860 [INFO] Epoch 13 of 50
+2023-03-20 00:25:49,942 [INFO] Epoch 12 complete. Loss: 0.5714012980461121 saving ./test2-t5/t5-base-epoch-13-2023-03-19 22:18:10.872373
+2023-03-20 00:25:50,015 [INFO] Epoch 14 of 50
+2023-03-20 00:35:40,028 [INFO] Epoch 13 complete. Loss: 0.5864179134368896 saving ./test2-t5/t5-base-epoch-14-2023-03-19 22:18:10.872373
+2023-03-20 00:35:40,111 [INFO] Epoch 15 of 50
+2023-03-20 00:45:28,812 [INFO] Epoch 14 complete. Loss: 0.7838023900985718 saving ./test2-t5/t5-base-epoch-15-2023-03-19 22:18:10.872373
+2023-03-20 00:45:28,890 [INFO] Epoch 16 of 50
+2023-03-20 00:55:14,745 [INFO] Epoch 15 complete. Loss: 0.5605169534683228 saving ./test2-t5/t5-base-epoch-16-2023-03-19 22:18:10.872373
+2023-03-20 00:55:14,825 [INFO] Epoch 17 of 50
+2023-03-20 01:05:07,745 [INFO] Epoch 16 complete. Loss: 0.7515761256217957 saving ./test2-t5/t5-base-epoch-17-2023-03-19 22:18:10.872373
+2023-03-20 01:05:08,480 [INFO] Epoch 18 of 50
+2023-03-20 01:14:57,925 [INFO] Epoch 17 complete. Loss: 0.5919592380523682 saving ./test2-t5/t5-base-epoch-18-2023-03-19 22:18:10.872373
+2023-03-20 01:14:58,011 [INFO] Epoch 19 of 50
+2023-03-20 01:24:46,004 [INFO] Epoch 18 complete. Loss: 0.4943889081478119 saving ./test2-t5/t5-base-epoch-19-2023-03-19 22:18:10.872373
+2023-03-20 01:24:46,082 [INFO] Epoch 20 of 50
+2023-03-20 01:34:34,318 [INFO] Epoch 19 complete. Loss: 0.5923895835876465 saving ./test2-t5/t5-base-epoch-20-2023-03-19 22:18:10.872373
+2023-03-20 01:34:34,398 [INFO] Epoch 21 of 50
+2023-03-20 01:44:22,126 [INFO] Epoch 20 complete. Loss: 0.37929219007492065 saving ./test2-t5/t5-base-epoch-21-2023-03-19 22:18:10.872373
+2023-03-20 01:44:22,202 [INFO] Epoch 22 of 50
+2023-03-20 01:54:08,264 [INFO] Epoch 21 complete. Loss: 0.5714386105537415 saving ./test2-t5/t5-base-epoch-22-2023-03-19 22:18:10.872373
+2023-03-20 01:54:08,347 [INFO] Epoch 23 of 50
+2023-03-20 02:03:55,809 [INFO] Epoch 22 complete. Loss: 0.6638572812080383 saving ./test2-t5/t5-base-epoch-23-2023-03-19 22:18:10.872373
+2023-03-20 02:03:55,888 [INFO] Epoch 24 of 50
+2023-03-20 02:13:41,912 [INFO] Epoch 23 complete. Loss: 0.4726012945175171 saving ./test2-t5/t5-base-epoch-24-2023-03-19 22:18:10.872373
+2023-03-20 02:13:41,998 [INFO] Epoch 25 of 50
+2023-03-20 02:23:28,336 [INFO] Epoch 24 complete. Loss: 0.45249828696250916 saving ./test2-t5/t5-base-epoch-25-2023-03-19 22:18:10.872373
+2023-03-20 02:23:28,405 [INFO] Epoch 26 of 50
+2023-03-20 02:33:15,064 [INFO] Epoch 25 complete. Loss: 0.41552770137786865 saving ./test2-t5/t5-base-epoch-26-2023-03-19 22:18:10.872373
+2023-03-20 02:33:15,147 [INFO] Epoch 27 of 50
+2023-03-20 02:43:01,277 [INFO] Epoch 26 complete. Loss: 0.5399461984634399 saving ./test2-t5/t5-base-epoch-27-2023-03-19 22:18:10.872373
+2023-03-20 02:43:01,352 [INFO] Epoch 28 of 50
+2023-03-20 02:52:47,892 [INFO] Epoch 27 complete. Loss: 0.39008164405822754 saving ./test2-t5/t5-base-epoch-28-2023-03-19 22:18:10.872373
+2023-03-20 02:52:47,971 [INFO] Epoch 29 of 50
+2023-03-20 03:02:34,669 [INFO] Epoch 28 complete. Loss: 0.34814172983169556 saving ./test2-t5/t5-base-epoch-29-2023-03-19 22:18:10.872373
+2023-03-20 03:02:34,749 [INFO] Epoch 30 of 50
+2023-03-20 03:12:22,588 [INFO] Epoch 29 complete. Loss: 0.66783607006073 saving ./test2-t5/t5-base-epoch-30-2023-03-19 22:18:10.872373
+2023-03-20 03:12:22,668 [INFO] Epoch 31 of 50
+2023-03-20 03:22:11,613 [INFO] Epoch 30 complete. Loss: 0.24255721271038055 saving ./test2-t5/t5-base-epoch-31-2023-03-19 22:18:10.872373
+2023-03-20 03:22:11,698 [INFO] Epoch 32 of 50
+2023-03-20 03:31:58,028 [INFO] Epoch 31 complete. Loss: 0.3944815397262573 saving ./test2-t5/t5-base-epoch-32-2023-03-19 22:18:10.872373
+2023-03-20 03:31:58,359 [INFO] Epoch 33 of 50
+2023-03-20 03:41:47,768 [INFO] Epoch 32 complete. Loss: 0.3370823860168457 saving ./test2-t5/t5-base-epoch-33-2023-03-19 22:18:10.872373
+2023-03-20 03:41:47,850 [INFO] Epoch 34 of 50
+2023-03-20 03:51:35,769 [INFO] Epoch 33 complete. Loss: 0.290657639503479 saving ./test2-t5/t5-base-epoch-34-2023-03-19 22:18:10.872373
+2023-03-20 03:51:36,102 [INFO] Epoch 35 of 50
+2023-03-20 04:01:25,192 [INFO] Epoch 34 complete. Loss: 0.3676021993160248 saving ./test2-t5/t5-base-epoch-35-2023-03-19 22:18:10.872373
+2023-03-20 04:01:26,408 [INFO] Epoch 36 of 50
+2023-03-20 04:11:14,693 [INFO] Epoch 35 complete. Loss: 0.2205500602722168 saving ./test2-t5/t5-base-epoch-36-2023-03-19 22:18:10.872373
+2023-03-20 04:11:14,772 [INFO] Epoch 37 of 50
+2023-03-20 04:21:04,136 [INFO] Epoch 36 complete. Loss: 0.47811317443847656 saving ./test2-t5/t5-base-epoch-37-2023-03-19 22:18:10.872373
+2023-03-20 04:21:04,215 [INFO] Epoch 38 of 50
+2023-03-20 04:30:56,305 [INFO] Epoch 37 complete. Loss: 0.29144036769866943 saving ./test2-t5/t5-base-epoch-38-2023-03-19 22:18:10.872373
+2023-03-20 04:30:56,383 [INFO] Epoch 39 of 50
+2023-03-20 04:40:45,484 [INFO] Epoch 38 complete. Loss: 0.30489909648895264 saving ./test2-t5/t5-base-epoch-39-2023-03-19 22:18:10.872373
+2023-03-20 04:40:45,561 [INFO] Epoch 40 of 50
+2023-03-20 04:50:32,688 [INFO] Epoch 39 complete. Loss: 0.5108187198638916 saving ./test2-t5/t5-base-epoch-40-2023-03-19 22:18:10.872373
+2023-03-20 04:50:32,771 [INFO] Epoch 41 of 50
+2023-03-20 05:00:22,644 [INFO] Epoch 40 complete. Loss: 0.21383549273014069 saving ./test2-t5/t5-base-epoch-41-2023-03-19 22:18:10.872373
+2023-03-20 05:00:22,722 [INFO] Epoch 42 of 50
+2023-03-20 05:10:09,585 [INFO] Epoch 41 complete. Loss: 0.4357033371925354 saving ./test2-t5/t5-base-epoch-42-2023-03-19 22:18:10.872373
+2023-03-20 05:10:10,597 [INFO] Epoch 43 of 50
+2023-03-20 05:19:56,948 [INFO] Epoch 42 complete. Loss: 0.27618083357810974 saving ./test2-t5/t5-base-epoch-43-2023-03-19 22:18:10.872373
+2023-03-20 05:19:57,270 [INFO] Epoch 44 of 50
+2023-03-20 05:29:46,343 [INFO] Epoch 43 complete. Loss: 0.5313388705253601 saving ./test2-t5/t5-base-epoch-44-2023-03-19 22:18:10.872373
+2023-03-20 05:29:46,416 [INFO] Epoch 45 of 50
+2023-03-20 05:39:36,045 [INFO] Epoch 44 complete. Loss: 0.23068928718566895 saving ./test2-t5/t5-base-epoch-45-2023-03-19 22:18:10.872373
+2023-03-20 05:39:36,148 [INFO] Epoch 46 of 50
+2023-03-20 05:49:26,104 [INFO] Epoch 45 complete. Loss: 0.28712576627731323 saving ./test2-t5/t5-base-epoch-46-2023-03-19 22:18:10.872373
+2023-03-20 05:49:26,183 [INFO] Epoch 47 of 50
+2023-03-20 05:59:12,280 [INFO] Epoch 46 complete. Loss: 0.3256905674934387 saving ./test2-t5/t5-base-epoch-47-2023-03-19 22:18:10.872373
+2023-03-20 05:59:12,356 [INFO] Epoch 48 of 50
+2023-03-20 06:09:00,736 [INFO] Epoch 47 complete. Loss: 0.34715038537979126 saving ./test2-t5/t5-base-epoch-48-2023-03-19 22:18:10.872373
+2023-03-20 06:09:01,716 [INFO] Epoch 49 of 50
+2023-03-20 06:18:47,023 [INFO] Epoch 48 complete. Loss: 0.28112947940826416 saving ./test2-t5/t5-base-epoch-49-2023-03-19 22:18:10.872373
+2023-03-20 06:18:47,101 [INFO] Epoch 50 of 50
+2023-03-20 06:28:35,752 [INFO] Epoch 49 complete. Loss: 0.32117506861686707 saving ./test2-t5/t5-base-epoch-50-2023-03-19 22:18:10.872373
