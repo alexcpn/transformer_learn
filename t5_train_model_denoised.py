@@ -44,7 +44,7 @@ log.info(f"encoding.input_ids.shape {encoding.input_ids.shape}")
 log.info(f"encoding.attention_mask.shape {encoding.attention_mask.shape}")
 len_train_data = encoding.input_ids.shape[1]
 log.info(f"length of dataset in tokens = {len_train_data}")
-# Add a test prompt to check overfitting
+# Add a test prompt to check over-fitting
 test_prompt = 'When was Gandhi born'
 #Ideal answer from gpt2 base model is something like below
 test_prompt_encoded = tokenizer(test_prompt, truncation=True, padding=False, return_tensors="pt")
@@ -64,13 +64,13 @@ model = T5ForConditionalGeneration.from_pretrained(model_name)
 # #https://towardsdatascience.com/conditional-text-generation-by-fine-tuning-gpt-2-11c1a9fc639d
 
 
-# Freeze the top 4 layers of the T5 model
-for param in model.encoder.block[:4].parameters():
+# Freeze tall the layers of the T5 model
+for param in model.encoder.block.parameters():
     param.requires_grad = False
 
-for parameter in model.parameters():
-     parameter.requires_grad = False
-n =8 # last four layers
+# Unfreeze the last total
+n =8 # last four layers  for t5-base 12 layer
+#n =22 # last four layers for t5-large 24 layers
 for i, m in enumerate(model.encoder.block):        
     #Only un-freeze the last n transformer blocks
     if i >= n:
@@ -89,7 +89,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #     log.info(f"Compiled the model for speed up")
 
 model.to(device)
-
 model.eval()
 test_output = model.generate(input_ids = test_prompt_encoded.input_ids.to(device),max_length=50,
                     num_return_sequences=1, pad_token_id=tokenizer.eos_token_id)
@@ -99,11 +98,11 @@ log.info(f"Over-fit check answer: {test_answer}")
 optimizer = torch.optim.Adam(model.parameters(), lr=3e-5) 
 
 # Set up the training parameters
-train_batch_size = 8
+train_batch_size = 4
 block_size = len_train_data-1
 if len_train_data > tokenizer.model_max_length:
-    block_size = int(tokenizer.model_max_length/8) # tokenizer.model_max_length=1024
-num_train_epochs = 20
+    block_size = int(tokenizer.model_max_length/4) # tokenizer.model_max_length=1024
+num_train_epochs = 50
 
 # Set the optimizer and learning rate scheduler
 # num_warmup_steps = 100
@@ -131,18 +130,18 @@ for epoch in range(num_train_epochs):
         #lr_scheduler.step()
         optimizer.zero_grad()
     # Save the model checkpoint every 10th
-    checkpoint_dir = f"./test-t5/{model_name}-epoch-{epoch+1}-{time_hash}"
+    checkpoint_dir = f"./test2-t5/{model_name}-epoch-{epoch+1}-{time_hash}"
     model.save_pretrained(checkpoint_dir)
     log.info(f"Epoch {epoch} complete. Loss: {loss.item()} saving {checkpoint_dir}")
-    model.eval()
-    # Check if the model has overfitted
-    test_output = model.generate(input_ids = test_prompt_encoded.input_ids.to(device),max_length=250,
-                        num_return_sequences=1, pad_token_id=tokenizer.eos_token_id)
-    test_answer = tokenizer.decode(test_output[0], skip_special_tokens=True)
-    log.info(f"Over-fit check answer: {test_answer}")
-    model.train()
-    # delete the previous save epoch
-    # checkpoint_dir = f"./model/{model_name}-epoch-{epoch}-{time_hash}"
+    # model.eval()
+    # # Check if the model has overfitted
+    # test_output = model.generate(input_ids = test_prompt_encoded.input_ids.to(device),max_length=250,
+    #                     num_return_sequences=1, pad_token_id=tokenizer.eos_token_id)
+    # test_answer = tokenizer.decode(test_output[0], skip_special_tokens=True)
+    # log.info(f"Over-fit check answer: {test_answer}")
+    # model.train()
+    #delete the previous save epoch
+    # checkpoint_dir = f"./test2-t5/{model_name}-epoch-{epoch}-{time_hash}"
     # try:
     #     shutil.rmtree(checkpoint_dir)
     # except:

@@ -7,7 +7,7 @@ def t5_qa(tokenizer, model, prompt,device):
     encoded_input = tokenizer(prompt, max_length=1024,
                                  truncation=True, return_tensors="pt")
     # print("input_ids",input_ids)
-    outputs = model.generate(input_ids = encoded_input.input_ids.to(device),max_length=500)
+    outputs = model.generate(input_ids = encoded_input.input_ids.to(device),max_length=500, no_repeat_ngram_size=1)
                             # attention_mask = encoded_input.attention_mask.to(device))
     print(100 * '-')    
     print(f"Prompt {prompt}")
@@ -20,8 +20,8 @@ if device.type == "cuda":
     deviceid = torch.cuda.current_device()
     print(f"Gpu device {torch.cuda.get_device_name(deviceid)}")
 
-tokenizer = T5Tokenizer.from_pretrained("t5-large", model_max_length=512)
-model = T5ForConditionalGeneration.from_pretrained("t5-large")
+tokenizer = T5Tokenizer.from_pretrained("t5-base", model_max_length=512)
+model = T5ForConditionalGeneration.from_pretrained("t5-base")
 
 model = model.to(device)
 prompt = "translate English to French:'what do the 3 dots mean in math?'"  # «Que signifient les 3 points en mathématiques?»
@@ -71,7 +71,7 @@ t5_qa(tokenizer, model, prompt,device) # refused  #todo check which prompt is us
 prompt = 'I enjoy walking with'
 t5_qa(tokenizer, model, prompt,device)
 
-'''
+''' t5-large
 ----------------------------------------------------------------------------------------------------
 Prompt:translate English to French:'what do the 3 dots mean in math?'
 «Que signifient les trois points en mathématiques?»

@@ -98,8 +98,8 @@ class FlaxDataCollatorForT5MLM:
     def __init__(self,tokenizer_len,tokenizer_eod_id,noise_density,mean_noise_span_length) -> None:
         self.tokenizer_len = tokenizer_len
         self.tokenizer_eos_token_id = tokenizer_eod_id
-        self.noise_density = noise_density
-        self.mean_noise_span_length =mean_noise_span_length
+        self.noise_density = noise_density # default .15
+        self.mean_noise_span_length =mean_noise_span_length # default 3 https://github.com/google-research/text-to-text-transfer-transformer/blob/84f8bcc14b5f2c03de51bd3587609ba8f6bbd1cd/t5/data/preprocessors.py#L2685
 
     def create_sentinel_ids(self, mask_indices):
         """
@@ -195,7 +195,7 @@ class FlaxDataCollatorForT5MLM:
 def get_denoised(tokenizer_len,eos_token_id, input_ids,batch_size):
     input_length = input_ids.shape[1] # take the length and skip the batch
     # create the denoiser
-    denoiser = FlaxDataCollatorForT5MLM(tokenizer_len,eos_token_id,.15,1.5)
+    denoiser = FlaxDataCollatorForT5MLM(tokenizer_len,eos_token_id,.15,3)
     # create random_spans masks [True,False, True ] in shape of batch
     mask_indices = np.asarray([denoiser.random_spans_noise_mask(input_length) for i in range(batch_size)])
     # labels mask is inverse of mask indices
