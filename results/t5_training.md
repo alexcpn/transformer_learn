@@ -95,3 +95,24 @@ denoised labels decoded   = <extra_id_0> again Even<extra_id_1> trans<extra_id_2
 denoised input_ids decoded = copyright information it will be appended to the image as<extra_id_0> if<extra_id_1> Copyright information Under<extra_id_2> tab select Copyright information then press the option to be set<extra_id_3> Enter author name or Enter copyright details then press The text entry screen will appear<extra_id_4> Display copyright info to check the<extra_id_5> right information<extra_id_6></s>
 denoised labels decoded   = <extra_id_0> Ex<extra_id_1> information Select<extra_id_2> the<extra_id_3> Select Select<extra_id_4> Select<extra_id_5> copy<extra_id_6> currently set</s>
 ```
+
+With t5-base generated
+
+```
+I enjoy walking with my 
+```
+
+```
+. I enjoy walking with my dog and enjoying the company of others, especially when it is a bit cold outside!
+```
+
+Model - 
+
+Model name ./test2-t5/t5-base-epoch-50-2023-03-19 22:18:10.872373
+Denoised Training  Loss: 0.32117506861686707 (results/training_2023-03-19 22:18:10.872373.log)
+
+Ouput -training/output_2023-03-20 12:29:42.829860.log
+
+```
+prompt-I enjoy walking with my
+response- enjoy being surrounded husband and take walk dog, to feet

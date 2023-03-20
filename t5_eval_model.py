@@ -20,7 +20,7 @@ log.basicConfig(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the model from the saved checkpoint directory
-checkpoint_dir ='./test-t5/t5-base-epoch-20-2023-03-15 22:32:47.637261'
+checkpoint_dir = './test2-t5/t5-base-epoch-50-2023-03-20 13:09:03.996482'
 tokenizer = T5Tokenizer.from_pretrained('t5-base',model_max_length=1024)
 tokenizer.pad_token = tokenizer.eos_token
 
@@ -51,8 +51,8 @@ while True:
       # making same as capability 
       encoded_input = tokenizer(prompt, truncation=True, padding=False, return_tensors="pt")
       #outputs = model.generate(input_ids=inputs.to(device), max_length=132, num_beams=4, early_stopping=True)
-      outputs = model.generate(input_ids = encoded_input.input_ids.to(device),max_length=250,
-                              num_return_sequences=1)
+      outputs = model.generate(input_ids = encoded_input.input_ids.to(device),
+                                 min_new_tokens=200,max_new_tokens=250, no_repeat_ngram_size=1)
 
       answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
       cprint(f"Question: {question}\n", 'green')
