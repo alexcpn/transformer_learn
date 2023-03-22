@@ -6,3 +6,7 @@ good_model/*
 torch_compile*
 minifierout.zip
 test-**/
+test**/**
+results/denoised/t5-base-epoch-50-2023-03-19 22:18:10.872373/config.json
+results/denoised/t5-base-epoch-50-2023-03-19 22:18:10.872373/generation_config.json
+results/denoised/t5-base-epoch-50-2023-03-19 22:18:10.872373/pytorch_model.bin
