@@ -27,7 +27,7 @@ log.basicConfig(
 
 model_name = 't5-base'
 #model_name = 'google/t5-small-ssm-nq'
-
+log.info(f"Model Name {model_name}")
 tokenizer = T5Tokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token
 
@@ -46,8 +46,8 @@ log.info(f"encoding.attention_mask.shape {encoding.attention_mask.shape}")
 len_train_data = encoding.input_ids.shape[1]
 log.info(f"length of dataset in tokens = {len_train_data}")
 # Add a test prompt to check over-fitting
-#test_prompt = 'I love walking with my ' # for t5-base
-test_prompt = 'What was Ghandi'
+test_prompt = 'I love walking with my ' # for t5-base
+#test_prompt = 'What was Ghandi'
 #Ideal answer from gpt2 base model is something like below
 test_prompt_encoded = tokenizer(test_prompt, truncation=True, padding=False, return_tensors="pt")
 # Gandhi was born in 1867. He was the son of a farmer and a merchant. He was educated at the University of Delhi. He was a member of the Indian National Congress. He was a member
@@ -100,11 +100,11 @@ log.info(f"Over-fit check answer: {test_answer}")
 optimizer = torch.optim.Adam(model.parameters(), lr=3e-5) 
 
 # Set up the training parameters
-train_batch_size = 4
+train_batch_size =4
 block_size = len_train_data-1
 if len_train_data > tokenizer.model_max_length:
-    block_size = int(tokenizer.model_max_length/2) #/4 for t5-base tokenizer.model_max_length=1024
-num_train_epochs = 50
+    block_size = int(tokenizer.model_max_length/4) #/4 for t5-base tokenizer.model_max_length=1024
+num_train_epochs = 100
 
 # Set the optimizer and learning rate scheduler
 # num_warmup_steps = 100
@@ -132,7 +132,7 @@ for epoch in range(num_train_epochs):
         #lr_scheduler.step()
         optimizer.zero_grad()
     # Save the model checkpoint every 10th
-    checkpoint_dir = f"./test4-t5/{model_name}-epoch-{epoch+1}-{time_hash}"
+    checkpoint_dir = f"./test5-t5/{model_name}-epoch-{epoch+1}-{time_hash}"
     model.save_pretrained(checkpoint_dir)
     log.info(f"Epoch {epoch} complete. Loss: {loss.item()} saving {checkpoint_dir}")
     model.eval()
@@ -144,7 +144,7 @@ for epoch in range(num_train_epochs):
     model.train()
     #delete the previous save epoch
     #if epoch % 10 != 0: # skip some model deletes 10,20 etc
-    checkpoint_dir = f"./test4-t5/{model_name}-epoch-{epoch}-{time_hash}"
+    checkpoint_dir = f"./test5-t5/{model_name}-epoch-{epoch}-{time_hash}"
     try:
         shutil.rmtree(checkpoint_dir)
     except:

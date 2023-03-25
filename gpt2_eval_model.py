@@ -20,11 +20,7 @@ log.basicConfig(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the model from the saved checkpoint directory
-checkpoint_dir ='./training/gpt2-epoch-50-7:54-4-6'
-checkpoint_dir ='./training/gpt2-epoch-50 2023-03-07 11:13:46.62'  # # Unfreeze 6: Loss: 0.06946726143360138
-#checkpoint_dir ='./training/gpt2-epoch-200-2023-03-08 20:00:21.576489' # Unfreeze 4: Loss: 0.0677826926112175
-#checkpoint_dir ='./training/gpt2-epoch-1000-2023-03-08 22:19:56.069333'# tain all layers: Loss: 0.040
-checkpoint_dir ='./test-gpt2/gpt2-epoch-50-2023-03-15 18:28:40.386832' #.74
+checkpoint_dir ='./test-gpt2-2/gpt2-epoch-100-2023-03-22 22:25:27.449184' #.74
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2',model_max_length=1024)
 #tokenizer.pad_token = tokenizer.eos_token
 
@@ -54,8 +50,13 @@ while True:
       #             max_length=132, num_beams=4, early_stopping=True)
       # making same as capability 
       encoded_input = tokenizer(prompt, truncation=True, padding=False, return_tensors="pt")
-      outputs = model.generate(input_ids = encoded_input.input_ids.to(device),max_length=250,
-                              num_return_sequences=1)
+      outputs = model.generate(input_ids = encoded_input.input_ids.to(device),
+                                 min_new_tokens=200,max_new_tokens=250, 
+                                 #num_beams=1,# 1 means no beam search
+                                 #early_stopping=True,
+                                 #num_beam_groups=1, #1 default
+                                 #temperature=1, # 1 default
+                                 no_repeat_ngram_size=1)
 
       answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
       cprint(f"Question: {question}\n", 'green')

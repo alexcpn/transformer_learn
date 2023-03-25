@@ -5,6 +5,7 @@ Helper to clean up the downloaded file
 from nltk.tokenize import word_tokenize
 import nltk
 nltk.download('punkt')
+import re
 
 # Clean up the data
 def cleanFile(fileNameIn, fileNameOut):
@@ -23,4 +24,16 @@ def cleanFile(fileNameIn, fileNameOut):
                 write_file.write(' '.join(map(str, words))+ " " )
 
 
-cleanFile("./data/eosrt3-eos1100d-im2-c-en.txt", "./data/clean2.txt")
+#cleanFile("./data/eosrt3-eos1100d-im2-c-en.txt", "./data/clean2.txt")
+
+with open('./data/17921-0-cleaned.txt','r') as f:
+    input_text =f.read()
+
+# Remove line breaks between sentence start and end
+s = re.sub(r'(?<!\n)\n(?!\n)', ' ', input_text)
+# remove [Fig...xx]
+s = re.sub(r'\[.*?\]', '', s,flags=re.DOTALL) 
+
+with open('./data/17921-0-cleaned_lb2.txt','w') as f:
+    f.write(s)
+
