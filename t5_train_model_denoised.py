@@ -10,7 +10,7 @@ import re
 import torch._dynamo.config
 
 print(torch.__version__)
-torch.set_float32_matmul_precision('high')
+torch.set_float32_matmul_precision('low')
 # torch._dynamo.config.log_level = log.DEBUG
 # torch._dynamo.config.verbose = True
 
@@ -46,9 +46,7 @@ log.info(f"encoding.attention_mask.shape {encoding.attention_mask.shape}")
 len_train_data = encoding.input_ids.shape[1]
 log.info(f"length of dataset in tokens = {len_train_data}")
 # Add a test prompt to check over-fitting
-test_prompt = 'I love walking with my ' # for t5-base
-#test_prompt = 'What was Ghandi'
-#Ideal answer from gpt2 base model is something like below
+test_prompt = 'complete:I love walking with my' # for t5-base
 test_prompt_encoded = tokenizer(test_prompt, truncation=True, padding=False, return_tensors="pt")
 # Gandhi was born in 1867. He was the son of a farmer and a merchant. He was educated at the University of Delhi. He was a member of the Indian National Congress. He was a member
 # flatten the tensor from  torch.Size([1, xx]) to  torch.Size([xxx])
@@ -93,14 +91,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 model.eval()
 test_output = model.generate(input_ids = test_prompt_encoded.input_ids.to(device),
-                    min_new_tokens=200,max_new_tokens=250, no_repeat_ngram_size=1)
+                   min_new_tokens=50, max_new_tokens=250,num_beams=10, no_repeat_ngram_size=1)
 test_answer = tokenizer.decode(test_output[0], skip_special_tokens=True)
 log.info(f"Over-fit check answer: {test_answer}")
 
 optimizer = torch.optim.Adam(model.parameters(), lr=3e-5) 
 
 # Set up the training parameters
-train_batch_size =4
+train_batch_size =8
 block_size = len_train_data-1
 if len_train_data > tokenizer.model_max_length:
     block_size = int(tokenizer.model_max_length/4) #/4 for t5-base tokenizer.model_max_length=1024
@@ -137,8 +135,8 @@ for epoch in range(num_train_epochs):
     log.info(f"Epoch {epoch} complete. Loss: {loss.item()} saving {checkpoint_dir}")
     model.eval()
     # Check if the model has over-fitted
-    test_output = model.generate(input_ids = test_prompt_encoded.input_ids.to(device),  
-                    min_new_tokens=200,max_new_tokens=250, no_repeat_ngram_size=1)
+    test_output = model.generate(input_ids = test_prompt_encoded.input_ids.to(device),
+                   min_new_tokens=50, max_new_tokens=250,num_beams=10, no_repeat_ngram_size=1)
     test_answer = tokenizer.decode(test_output[0], skip_special_tokens=True)
     log.info(f"Over-fit check answer: {test_answer}")
     model.train()
