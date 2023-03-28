@@ -20,7 +20,8 @@ log.basicConfig(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the model from the saved checkpoint directory
-checkpoint_dir ='./test-gpt2-2/gpt2-epoch-100-2023-03-22 22:25:27.449184' #.74
+checkpoint_dir ='./test-gpt2-2/gpt2-epoch-100-2023-03-22 22:25:27.449184' #.74 - base model
+checkpoint_dir ='test-gpt2-3/gpt2-epoch-100-2023-03-22 22:25:27.449184-epoch-50-2023-03-28 13:21:49.496735'# .02 tuned on qa
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2',model_max_length=1024)
 #tokenizer.pad_token = tokenizer.eos_token
 

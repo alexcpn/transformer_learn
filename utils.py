@@ -230,6 +230,12 @@ def get_batch_denoised(len_train_data,all_input_ids,all_attention_mask,device,
 
 
 def get_batch_for_qa(qa_df_ids,device,tokenizer,batch_size):
+    """
+     This is used to generate inputs_ids containing question and labels containing 
+     answers. T5 is a prompt based causal masking model and does not need input_ids
+     and labels to be of same size
+    """
+
     # random select from training data set
     len_train_data = len(qa_df_ids.index)
     if len_train_data <= batch_size:
@@ -237,15 +243,75 @@ def get_batch_for_qa(qa_df_ids,device,tokenizer,batch_size):
     ix = np.random.randint(0,len_train_data , (batch_size,))
     # randomly select n rows of column 0
     x = [(qa_df_ids.iloc[i,0]) for i in ix]
-    x= tokenizer(x,padding='longest').input_ids
-    x = [torch.tensor(x) for x in x]
+    x1= tokenizer(x,padding='longest') #todo - do the tokenisation outside
+    x= x1.input_ids
+    x = [torch.tensor(i) for i in x]
     x= torch.stack(x)
     # do the same for the answers , the labels (column 1)
     y = [(qa_df_ids.iloc[i,1]) for i in ix]
     y= tokenizer(y,padding='longest').input_ids
-    y = [torch.tensor(y) for y in y]
+    y = [torch.tensor(i) for i in y]
     y= torch.stack(y)
-    m = torch.ones(x.shape)
+    m = x1.attention_mask #pads would be masked out
+    m = [torch.tensor(i) for i in m]
+    m = torch.stack(m)
+    if device.type == 'cuda':
+        # pin arrays x,y, which allows us to move them to GPU asynchronously (non_blocking=True)
+        x, y = x.pin_memory().to(device, non_blocking=True), y.pin_memory().to(device, non_blocking=True)
+        m =m.pin_memory().to(device, non_blocking=True)
+    else:
+        x, y = x.to(device), y.to(device)
+        m =m.to(device)
+    return x, y,m
+
+def get_batch_for_qa_gpt(qa_df_ids,device,tokenizer,batch_size):
+    """
+     This is used to generate inputs_ids containing question and labels containing 
+     answers. GPT is a causal masking model and needs input_ids
+     and labels to be of same size. So we concatenate the questions and answers together
+     as input_ids, labels == input_ids
+    """
+
+    # random select from training data set
+    len_train_data = len(qa_df_ids.index)
+    if len_train_data <= batch_size:
+        batch_size =len_train_data
+    ix = np.random.randint(0,len_train_data , (batch_size,))
+    # randomly select n rows of column 0
+    x = [(qa_df_ids.iloc[i,0]) for i in ix]
+    x1= tokenizer(x,padding='longest') #todo - do the tokenisation outside
+    x= x1.input_ids
+    x = [torch.tensor(i) for i in x]
+    x= torch.stack(x)
+    # do the same for the answers , the labels (column 1)
+    y = [(qa_df_ids.iloc[i,1]) for i in ix]
+    y1= tokenizer(y,padding='longest',truncation=True)
+    y= y1.input_ids
+    y = [torch.tensor(i) for i in y]
+    y= torch.stack(y)
+    m1 = x1.attention_mask #pads would be masked out
+    m1 = [torch.tensor(i) for i in m1]
+    m1 = torch.stack(m1)
+    m2 = y1.attention_mask
+    m2 = [torch.tensor(i) for i in m2]
+    m2 = torch.stack(m2)
+    
+    # gpt2 need input_ids/text and labels/targets of the same length
+    # for QA type data set we need to concatenate the questions and answers as single input
+
+    # add <endoftext> token after question
+    number_to_append = 50256 # "<|endoftext|>"
+    new_col = torch.full((batch_size, 1), number_to_append)
+    x = torch.hstack((x,new_col ))
+    # do same for the attention mask
+    new_col = torch.full((batch_size, 1), 0)
+    m1 = torch.hstack((m1,new_col ))
+    # concatenate x and y to x (y==x)
+    x = torch.hstack((x,y))
+    y = x
+    # concatenate m1 and m2 to m 
+    m = torch.hstack((m1,m2))
+
     if device.type == 'cuda':
         # pin arrays x,y, which allows us to move them to GPU asynchronously (non_blocking=True)
         x, y = x.pin_memory().to(device, non_blocking=True), y.pin_memory().to(device, non_blocking=True)

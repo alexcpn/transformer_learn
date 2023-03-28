@@ -23,11 +23,9 @@ Epoch 0 complete. Loss: 1.7716443538665771
 
 ## Fine-tuning further with QA
 
-The idea is to use this model as base for further fine tuning. Further fine-tuning is done by extracting some
-relevant medical terms using NER (NLTK lib) and then extracting the sentences in the text containing the selected 
-entities, and some n follwoing sentences
+The idea is to use this model as base for further fine tuning. Further fine-tuning is done by extracting some relevant medical terms using NER (NLTK lib) and then extracting the sentences in the text containing the selected  entities, and some n following sentences
 
-An example of such a model is './test9-t5/t5-base-trained-medical-epoch-50-2023-03-27 19:44:17.137498'
+An example of such a model is './test10-t5/t5-base-trained-medical-epoch-50-2023-03-28 11:48:52.750335'
 
 Script - `t5_train_model_qa.py`
 Note - Since the (tokenized) lengths of different lengths are different, tokenization with pad to the largest in the batch was used. However the attention mask need to be set to zero for the padded tokens. That was missed //todo
@@ -40,11 +38,11 @@ Loss: 0.04138697311282158
 It starts to generate almost meaningful sentence
 
 ```
-Question: describe: Syphilitic
+Question: describe: tetanus
 
 Generated
 
-Syphilitic ulcers may be met with in any part of the body, but are most frequent underthe head at one or more points on their course.The scorbutic gland occurs when a patient is suffering from leucocytoSis (pyocyaneus), and gives rise to irritation by such sources as blistering for example; underneath large pendulous mammary pitting along its edges like parchment-paper); beneath stained films: "grumious periostiti" deformans OF THE BLOOD SARCOMA The term serous cystitIS was applied during prohibition against growth cancer only because it results after infection through neglectful treatment without excessive loss Of tissue?This condition usually begins within three weeks before marriage rather than two years old people having acquired what has been called an abradex."When dueto inflammation causes death there will subcutaneous lesions which result either not leave permanent changes that can take place externally," said John Hunter'uvre).Enlargement overgrowth first takes origin almost exclusively upon some focus about half his age group who have taken arsonically long periods between subsequent crops yield excellent résultats
+The characteristic symptoms of tetarus are those common to the acute form, and include such overgrowths as result from injury or disease for example in synovial membrane.Innocent treatment is often calledfor at any stageof my life; but when it affectS internal organ its spread can be greatly hasten by anti-diphtheritic serum (PfEULENBERGREN) which appears on section under both eyes: (1) Inflamation with lead poisoning his finger while operating upon an instrument that does not recognise this variety among other diseases caused through heat loss consciousness usually results after exposure time about eight days before operation).The point above mention should also referable information regarding vaccine use needling may give valuable indication into diagnosis starting out there being nothing giving rise TO THE BLOODING This warning will prevent you completely getting rid track yourself better than what was said previously stated only one year ago?A similar type known clinical term trade epitititic tumour growing off lesion had been employed along curiosity backward movement towards recovery now available so long duration without risk taking place between then expiry date coming up front view him
 ```
 
 # GPT2 Based
@@ -119,4 +117,22 @@ contrary, the sore may be actually increasing in area by the
 
 ## Fine-tuning for QA
 
-GPT2 needs the input_ids and labels (targets) to be the same length as it uses causual masking. - masks word at position x in input_ids and uses the word at position x as the target for loss. The model sees all words up to x-1 postion for predicting the xth word. 
+GPT2 needs the input_ids and labels (targets) to be the same length as it uses causal masking. - masks word at position x in input_ids and uses the word at position x as the target for loss. The model sees all words up to x-1 position for predicting the xth word. For this the Question is 
+appended to the answer and trained
+
+Model `./test-gpt2-3/gpt2-epoch-100-2023-03-22 22:25:27.449184-epoch-50-2023-03-28`
+
+Loss: 0.029238400980830193 
+
+Training script = gpt2_train_model_qa.py
+
+```
+Question: describe: Cysts of Bone
+
+enerated
+
+describe: Cysts of Bone resulting from Direct Extension From Soft Parts.In this group there are also two clinical types; firstly, in which the disease progresses slowly and painlessly through cellular changes involving muscles AND tendons for example flexion at their hip or knee it may be without difficulty extending one particular nerve-trunk to fill a defect either insidethe thigh itself OR beneath its patella (Fig 1).They take origin almost exclusivelyFrom an overgrowth OF THE connective tissue throughout The muscle substance WHICH ARISES IN SURGICAL OPERATIONS  Injuries produced by Exposure To XCIVICATION DISEASIES PRODUCED BY ELECTRICITY DISEASE Thrombosis is frequently observed as resultance after injury, especially when ulnar injuries have been followedligation within three months ;and if continuity failsto give relief following resection last year's operation arthroplasty was more successful than any other formof treatment thus far employed except that applicable under our own supervision haseneivered with remarkable results since operations suchas those performedby Moore College Medical Publications on thirty eight years agoThis method need scarcely require quoting John Hunter nor do we agree WITH his view That Syphilis Should Be Punctured At Any Age Favourable For
+```
+
+Note that sometimes the break in the document , like chapter summaries affect the generation.Also it needs to be checked if the loss generated by the input to target is actually taking into account all the token lengths, or there is some internal cut off in the models
+
