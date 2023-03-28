@@ -71,13 +71,13 @@ def printTokenizerDetails(tokenizer):
 # from Karpathy and modified
 # https://github.com/karpathy/nanoGPT/blob/086ebe1822791b775e951b4b562fbb7131d83cc2/train.py
 def get_batch(len_train_data,input_ids,attention_mask,device,block_size=1024,
-                    batch_size=12, device_type = 'cuda'):
+                    batch_size=12):
     # random select from training data set
     ix = torch.randint(0,len_train_data-block_size , (batch_size,))
     x = torch.stack([(input_ids[i:i+block_size]) for i in ix])
     y = torch.stack([((attention_mask[i:i+block_size])) for i in ix])
     # trying with a random attention mask -
-    if device_type == 'cuda':
+    if device.type == 'cuda':
         # pin arrays x,y, which allows us to move them to GPU asynchronously (non_blocking=True)
         x, y = x.pin_memory().to(device, non_blocking=True), y.pin_memory().to(device, non_blocking=True)
     else:
@@ -227,3 +227,30 @@ def get_batch_denoised(len_train_data,all_input_ids,all_attention_mask,device,
         labels_dn =labels_dn.to(device)
         attention_mask = attention_mask.to(device)
     return input_ids_dn, labels_dn, attention_mask
+
+
+def get_batch_for_qa(qa_df_ids,device,tokenizer,batch_size):
+    # random select from training data set
+    len_train_data = len(qa_df_ids.index)
+    if len_train_data <= batch_size:
+        batch_size =len_train_data
+    ix = np.random.randint(0,len_train_data , (batch_size,))
+    # randomly select n rows of column 0
+    x = [(qa_df_ids.iloc[i,0]) for i in ix]
+    x= tokenizer(x,padding='longest').input_ids
+    x = [torch.tensor(x) for x in x]
+    x= torch.stack(x)
+    # do the same for the answers , the labels (column 1)
+    y = [(qa_df_ids.iloc[i,1]) for i in ix]
+    y= tokenizer(y,padding='longest').input_ids
+    y = [torch.tensor(y) for y in y]
+    y= torch.stack(y)
+    m = torch.ones(x.shape)
+    if device.type == 'cuda':
+        # pin arrays x,y, which allows us to move them to GPU asynchronously (non_blocking=True)
+        x, y = x.pin_memory().to(device, non_blocking=True), y.pin_memory().to(device, non_blocking=True)
+        m =m.pin_memory().to(device, non_blocking=True)
+    else:
+        x, y = x.to(device), y.to(device)
+        m =m.to(device)
+    return x, y,m

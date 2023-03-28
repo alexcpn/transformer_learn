@@ -21,7 +21,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the model from the saved checkpoint directory
 checkpoint_dir = 't5-base'
-checkpoint_dir = './test4-t5/t5-base-epoch-50-2023-03-20 22:29:00.348651'
+checkpoint_dir = './test5-t5-good/t5-base-epoch-100-2023-03-25 20:35:35.638512' #base model
+checkpoint_dir ='./test8-t5/t5-base-trained-medical-epoch-50-2023-03-27 17:52:27.464850'
+checkpoint_dir ='./test9-t5/t5-base-trained-medical-epoch-50-2023-03-27 19:44:17.137498'
 tokenizer = T5Tokenizer.from_pretrained('t5-base',model_max_length=1024)
 tokenizer.pad_token = tokenizer.eos_token
 
