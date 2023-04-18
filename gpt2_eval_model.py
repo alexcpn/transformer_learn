@@ -20,12 +20,11 @@ log.basicConfig(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the model from the saved checkpoint directory
-checkpoint_dir ='./test-gpt2-2/gpt2-epoch-100-2023-03-22 22:25:27.449184' #.74 - base model
-checkpoint_dir ='test-gpt2-3/gpt2-epoch-100-2023-03-22 22:25:27.449184-epoch-50-2023-03-28 13:21:49.496735'# .02 tuned on qa
+checkpoint_dir ='./test-gpt2-2/gpt2-epoch-20-2023-04-18 14:28:02.563478'
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2',model_max_length=1024)
-#tokenizer.pad_token = tokenizer.eos_token
-
-model = GPT2LMHeadModel.from_pretrained(checkpoint_dir,pad_token_id=tokenizer.eos_token_id)
+tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+model = GPT2LMHeadModel.from_pretrained(checkpoint_dir,pad_token_id='[PAD]')
+model.resize_token_embeddings(len(tokenizer))
 model.to(device)
 model.eval()
 
@@ -42,7 +41,7 @@ while True:
             print("Exiting")
             break
       print(f'Processing Message from input()')
-      prompt = f"{ question}"
+      prompt = f"{question}"
       #encoding = tokenizer(prompt, return_tensors='pt').to(device)
       # print(encoding['input_ids'])
       # print(encoding['attention_mask'])
@@ -50,9 +49,10 @@ while True:
       #             attention_mask=encoding['attention_mask'],
       #             max_length=132, num_beams=4, early_stopping=True)
       # making same as capability 
-      encoded_input = tokenizer(prompt, truncation=True, padding=False, return_tensors="pt")
+      encoded_input = tokenizer(prompt, truncation=True, padding=True, return_tensors="pt")
       outputs = model.generate(input_ids = encoded_input.input_ids.to(device),
-                                 min_new_tokens=200,max_new_tokens=250, 
+                                 min_new_tokens=200,
+                                 max_new_tokens=250, 
                                  #num_beams=1,# 1 means no beam search
                                  #early_stopping=True,
                                  #num_beam_groups=1, #1 default
@@ -65,6 +65,14 @@ while True:
       cprint(f"{answer}\n", 'blue') 
       log.info(f"Question: {question}")
       log.info(f"Generated: {answer}") 
+      # the below is better 
+      test_output = model.generate(input_ids = encoded_input.input_ids.to(device),max_length=250,
+                    num_return_sequences=1, pad_token_id=tokenizer.eos_token_id)
+      test_answer = tokenizer.decode(test_output[0], skip_special_tokens=True)
+      log.info(f"Generated 2: {test_answer}")
+      cprint(f"Generated 2\n", 'cyan') 
+      cprint(f"{test_answer}\n", 'blue') 
+
       
 
 

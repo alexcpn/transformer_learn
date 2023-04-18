@@ -4,7 +4,7 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2',model_max_length=1024,padding_side='left')
 tokenizer.pad_token = tokenizer.eos_token # == <|endoftext|> = 50256
-model_name = './test/gpt2-epoch-10-2023-03-12 16:02:19.289492' #Loss: 6.827305332990363e-05  # Model Loss
+model_name = './test-gpt2-2/gpt2-epoch-20-2023-04-15 16:31:57.913960' #Loss: 0.0506  # Model Loss
 model = GPT2LMHeadModel.from_pretrained(model_name)
 
 batch_size=5
@@ -35,4 +35,8 @@ print(f"input_ids={input_ids}")
 outputs = model.generate(input_ids=input_ids, attention_mask=attention_mask,max_new_tokens=1)
 answer = tokenizer.decode(outputs[0], skip_special_tokens=False)
 print(f"Result '{answer}'")
-
+input_ids = input_ids[:,:-2] # "Welcome to"
+test_output = model.generate(input_ids = input_ids,max_length=250,
+                    num_return_sequences=1, pad_token_id=tokenizer.eos_token_id)
+test_answer = tokenizer.decode(test_output[0], skip_special_tokens=True)
+print(f"Result 2 '{test_answer}'")
