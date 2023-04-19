@@ -144,7 +144,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
 # ------------ Set up the training parameters----------------------------------
 
-num_train_epochs = 50  # 100 increase this if data is small
+num_train_epochs = 100  # 100 increase this if data is small
 train_batch_size = 4  # reduce this if you run out of memory
 train_block_size = len_train_data-1  # this is how much text in each batch
 if len_train_data > tokenizer.model_max_length:
@@ -195,8 +195,7 @@ for epoch in range(num_train_epochs):
         # lr_scheduler.step()
         optimizer.zero_grad()
     avg_epoch_loss = epoch_loss /count
-    log.info(f"Train Epoch {epoch} complete.Avg Loss: {avg_epoch_loss}"+
-             f" Going to save {checkpoint_dir}")
+    log.info(f"Train Epoch {epoch} complete.Avg Loss: {avg_epoch_loss}")
     # -----------Test to check the model learning------------------------------
 
     model.eval()  # Set model to Eval loop
@@ -209,6 +208,7 @@ for epoch in range(num_train_epochs):
     # --------- Save current Epoch and Delete Previous Epoch-------------------
     checkpoint_dir = f"./small3-gpt2-5/{model_name}-epoch-{epoch+1}-{time_hash}"
     model.save_pretrained(checkpoint_dir)
+    log.info(f"Saved Model at {checkpoint_dir}")
     try:
         checkpoint_dir = f"./small3-gpt2-5/{model_name}-epoch-{epoch}-{time_hash}"
         shutil.rmtree(checkpoint_dir)
@@ -216,7 +216,7 @@ for epoch in range(num_train_epochs):
         pass
 
     # -----------Calculate Validation loss-------------------------------------
-    
+
     validation_loss = 0
     count = 0
     with torch.no_grad():
