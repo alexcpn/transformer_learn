@@ -175,8 +175,10 @@ for epoch in range(num_train_epochs):
     model.train()
     log.info(f"Epoch {epoch+1} of {num_train_epochs}")
     epoch_loss = 0
+    count =0
     # For each Epoch go randomly through parts of the data based on block size
     for i in range(0, len_train_data, train_block_size):
+        count += 1
         # Get data in random per batch from input
         # not all training data may not be covered in one epoch here
         x, y = get_batch(len_train_data, train_input_ids, train_attention_mask,
@@ -192,37 +194,37 @@ for epoch in range(num_train_epochs):
         optimizer.step()
         # lr_scheduler.step()
         optimizer.zero_grad()
+    avg_epoch_loss = epoch_loss /count
+    log.info(f"Train Epoch {epoch} complete.Avg Loss: {avg_epoch_loss}"+
+             f" Going to save {checkpoint_dir}")
     # -----------Test to check the model learning------------------------------
 
     model.eval()  # Set model to Eval loop
     test_output = model.generate(input_ids=prompt_encoded.input_ids.to(device),
-                                 max_length=250,
+                                 max_length=100,
                                  num_return_sequences=1)
     test_answer = tokenizer.decode(test_output[0], skip_special_tokens=True)
     log.info(f"Over-fit check answer: {test_answer}")
 
     # --------- Save current Epoch and Delete Previous Epoch-------------------
-
     checkpoint_dir = f"./small3-gpt2-5/{model_name}-epoch-{epoch+1}-{time_hash}"
     model.save_pretrained(checkpoint_dir)
-    log.info(f"Train Epoch {epoch} complete. Loss: {loss.item()}"+
-             f" Saved {checkpoint_dir}")
     try:
         checkpoint_dir = f"./small3-gpt2-5/{model_name}-epoch-{epoch}-{time_hash}"
         shutil.rmtree(checkpoint_dir)
     except:
         pass
-    # -----------Calculate Validation loss-------------------------------------
 
+    # -----------Calculate Validation loss-------------------------------------
+    
     validation_loss = 0
+    count = 0
     with torch.no_grad():
         for i in range(0, len_test_data, test_block_size):
+            count += 1
             x, y = get_batch(len_test_data, test_input_ids, test_attention_mask, device,
                              block_size=test_block_size, batch_size=test_batch_size)
             outputs = model(input_ids=x, attention_mask=y, labels=x)
-
             validation_loss += outputs.loss.item()
-    avg_validation_loss = validation_loss / (len_test_data // test_block_size)
-    avg_epoch_loss = epoch_loss /(len_train_data // train_block_size)
     log.info(f"Train and Validation Epoch {epoch} complete. Averge Loss: {avg_epoch_loss} " +
-                 f"Avg Validation Loss {avg_validation_loss}")
+                 f"Avg Validation Loss  {validation_loss/count}")
