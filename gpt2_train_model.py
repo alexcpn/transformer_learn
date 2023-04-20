@@ -30,6 +30,7 @@ log.basicConfig(
 
 # ------------Initialise Tokenizer---------------------------------------------
 
+model_name = 'gpt2-medium' # out of memory
 model_name = 'gpt2'
 tokenizer = GPT2Tokenizer.from_pretrained(model_name,padding_side='left')
 # tokenizer.pad_token = tokenizer.eos_token # wrong
@@ -95,21 +96,21 @@ model.resize_token_embeddings(len(tokenizer))
 # ---------------- Freeze bottom n layers (Optional)---------------------------
 # Idea from https://bit.ly/3NdbpvR
 
-for parameter in model.parameters():
-    parameter.requires_grad = False
-n = 8  # last four layers
-for i, m in enumerate(model.transformer.h):
-    # Only un-freeze the last n transformer blocks
-    if i >= n:
-        for parameter in m.parameters():
-            parameter.requires_grad = True
-        log.info(f"Un-freezed layer {i} for training")
+# for parameter in model.parameters():
+#     parameter.requires_grad = False
+# n = 8  # last four layers
+# for i, m in enumerate(model.transformer.h):
+#     # Only un-freeze the last n transformer blocks
+#     if i >= n:
+#         for parameter in m.parameters():
+#             parameter.requires_grad = True
+#         log.info(f"Un-freezed layer {i} for training")
 
-for parameter in model.transformer.ln_f.parameters():
-    parameter.requires_grad = True
+# for parameter in model.transformer.ln_f.parameters():
+#     parameter.requires_grad = True
 
-for parameter in model.lm_head.parameters():
-    parameter.requires_grad = True
+# for parameter in model.lm_head.parameters():
+#     parameter.requires_grad = True
 
 # -------Use CUDA/GPU if Available---------------------------------------------
 

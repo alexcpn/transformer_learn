@@ -299,8 +299,8 @@ def get_batch_for_qa_gpt(qa_df_ids,device,tokenizer,batch_size):
     # gpt2 need input_ids/text and labels/targets of the same length
     # for QA type data set we need to concatenate the questions and answers as single input
 
-    # add <endoftext> token after question
-    number_to_append = 50257 # "[PAD]"
+    # add <endoftext> token after question answer
+    number_to_append = 50256 # <endoftext>
     new_col = torch.full((batch_size, 1), number_to_append)
     x = torch.hstack((x,new_col ))
     # do same for the attention mask

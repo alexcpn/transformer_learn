@@ -30,14 +30,19 @@ tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 
 df = pd.read_csv('./data/small_3_qa2.csv',index_col=False,sep='|')
 
-train_df=df.sample(frac=0.8,random_state=200)
+train_df=df.sample(frac=0.9,random_state=200)
+len_data = len(df.index)
 test_df=df.drop(train_df.index)
 len_test_data = len(test_df.index)
 len_train_data = len(train_df.index)
 
-log.info(f"Total QA dataset rows={len_train_data}")
+# test_df.to_csv("./data/test_df.csv")
+# train_df.to_csv("./data/train_df.csv")
+
+
+log.info(f"Total QA dataset rows={len_data}")
 log.info(f"len_train_data={len_train_data}")
-log.info(f"len_train_data={len_test_data}")
+log.info(f"len_test_data={len_test_data}")
 
 # Load the model to fine tune
 
@@ -84,7 +89,7 @@ log.info(f"Over-fit check answer before training: {test_answer}")
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
 # Set up the training parameters
-train_batch_size = 16
+train_batch_size = 12
 test_batch_size =train_batch_size
 num_train_epochs = 200
 num_train_steps = len_train_data // train_batch_size * num_train_epochs
