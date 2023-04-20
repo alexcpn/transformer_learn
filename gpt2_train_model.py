@@ -31,7 +31,7 @@ log.basicConfig(
 # ------------Initialise Tokenizer---------------------------------------------
 
 model_name = 'gpt2'
-tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+tokenizer = GPT2Tokenizer.from_pretrained(model_name,padding_side='left')
 # tokenizer.pad_token = tokenizer.eos_token # wrong
 tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 
@@ -159,7 +159,6 @@ num_test_steps = len_test_data // test_batch_size * num_train_epochs
 log.info(f"len_test_data={len_train_data} test_block_size ={test_block_size}"+
                     f" test_batch_size= {test_batch_size}")
 
-
 # We are not using the below for now as I have not understood it
 # Set the optimizer and learning rate scheduler
 # num_warmup_steps = 100
@@ -206,11 +205,11 @@ for epoch in range(num_train_epochs):
     log.info(f"Over-fit check answer: {test_answer}")
 
     # --------- Save current Epoch and Delete Previous Epoch-------------------
-    checkpoint_dir = f"./small3-gpt2-5/{model_name}-epoch-{epoch+1}-{time_hash}"
+    checkpoint_dir = f"./small3-gpt2-6/{model_name}-epoch-{epoch+1}-{time_hash}"
     model.save_pretrained(checkpoint_dir)
     log.info(f"Saved Model at {checkpoint_dir}")
     try:
-        checkpoint_dir = f"./small3-gpt2-5/{model_name}-epoch-{epoch}-{time_hash}"
+        checkpoint_dir = f"./small3-gpt2-6/{model_name}-epoch-{epoch}-{time_hash}"
         shutil.rmtree(checkpoint_dir)
     except:
         pass

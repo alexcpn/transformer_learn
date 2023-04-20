@@ -20,7 +20,10 @@ log.basicConfig(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the model from the saved checkpoint directory
-checkpoint_dir ='./small3-gpt2-5/gpt2-epoch-100-2023-04-19 13:57:47.849368'
+checkpoint_dir ='./small3-qa/small3qa-epoch-100-2023-04-19 19:51:21.593889'
+#Epoch 99 complete. Averge Loss: 0.6303646266460419 Avg Validation Loss  2.4538359301430837
+checkpoint_dir ='./small3-qa/small3qa-epoch-200-2023-04-19 21:22:20.657661'
+#Averge Loss: 0.9783549904823303 Avg Validation Loss  4.583101272583008
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2',model_max_length=1024,padding_side='left')
 tokenizer.add_special_tokens({'pad_token': '[PAD]'}) # note we have used this while training
 model = GPT2LMHeadModel.from_pretrained(checkpoint_dir,pad_token_id=50257)

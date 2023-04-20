@@ -278,39 +278,40 @@ def get_batch_for_qa_gpt(qa_df_ids,device,tokenizer,batch_size):
         batch_size =len_train_data
     ix = np.random.randint(0,len_train_data , (batch_size,))
     # randomly select n rows of column 0
-    x = [(qa_df_ids.iloc[i,0]) for i in ix]
-    x1= tokenizer(x,padding='longest') #todo - do the tokenisation outside
+    x = [(qa_df_ids.iloc[i,0]) for i in ix] # first column- question
+    x1= tokenizer(x,padding='longest') #todo - do the tokenization outside
     x= x1.input_ids
     x = [torch.tensor(i) for i in x]
     x= torch.stack(x)
-    # do the same for the answers , the labels (column 1)
-    y = [(qa_df_ids.iloc[i,1]) for i in ix]
-    y1= tokenizer(y,padding='longest',truncation=True)
-    y= y1.input_ids
-    y = [torch.tensor(i) for i in y]
-    y= torch.stack(y)
+    # do the same for the answers , the labels (column 1) # see note below on why it is commented**
+    # y = [(qa_df_ids.iloc[i,1]) for i in ix] # second column - answers
+    # y1= tokenizer(y,padding='longest')
+    # y= y1.input_ids
+    # y = [torch.tensor(i) for i in y]
+    # y= torch.stack(y)
     m1 = x1.attention_mask #pads would be masked out
     m1 = [torch.tensor(i) for i in m1]
     m1 = torch.stack(m1)
-    m2 = y1.attention_mask
-    m2 = [torch.tensor(i) for i in m2]
-    m2 = torch.stack(m2)
+    # m2 = y1.attention_mask
+    # m2 = [torch.tensor(i) for i in m2]
+    # m2 = torch.stack(m2)
     
     # gpt2 need input_ids/text and labels/targets of the same length
     # for QA type data set we need to concatenate the questions and answers as single input
 
     # add <endoftext> token after question
-    number_to_append = 50256 # "<|endoftext|>"
+    number_to_append = 50257 # "[PAD]"
     new_col = torch.full((batch_size, 1), number_to_append)
     x = torch.hstack((x,new_col ))
     # do same for the attention mask
     new_col = torch.full((batch_size, 1), 0)
     m1 = torch.hstack((m1,new_col ))
     # concatenate x and y to x (y==x)
-    x = torch.hstack((x,y))
+    #x = torch.hstack((x,y))
     y = x
     # concatenate m1 and m2 to m 
-    m = torch.hstack((m1,m2))
+    #m = torch.hstack((m1,m2))
+    m = m1
 
     if device.type == 'cuda':
         # pin arrays x,y, which allows us to move them to GPU asynchronously (non_blocking=True)
@@ -320,3 +321,8 @@ def get_batch_for_qa_gpt(qa_df_ids,device,tokenizer,batch_size):
         x, y = x.to(device), y.to(device)
         m =m.to(device)
     return x, y,m
+
+    #** The two cols in the csv are commented because we get both question and answer padded (either left or right)
+    #[INFO] Decoded check: 2 Which famous surgeon emphasized the importance of rest for the restoration of injured parts? [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD]  John Hunter [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD]
+    # to now
+    # Decoded check: 3 [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] Which tissue is used as a graft to fill defects in the dura mater? The fascia lata of the thigh is widely used as a graft to fill defects in the dura mater. [PAD]
