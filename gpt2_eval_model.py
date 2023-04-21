@@ -22,8 +22,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Load the model from the saved checkpoint directory
 checkpoint_dir ='./small3-qa/small3qa-epoch-100-2023-04-19 19:51:21.593889'
 #Epoch 99 complete. Averge Loss: 0.6303646266460419 Avg Validation Loss  2.4538359301430837
-checkpoint_dir ='./small3-qa/small3qa-epoch-200-2023-04-19 21:22:20.657661'
+checkpoint_dir ='./small3-qa/small3qa-epoch-200-2023-04-19 21:22:20.657661' # forzen training
 #Averge Loss: 0.9783549904823303 Avg Validation Loss  4.583101272583008
+checkpoint_dir ='./small3-qa/small3qa-epoch-200-2023-04-20 19:35:15.238081' # non forzen training base
+#Averge Loss: 0.18213593065738679 Avg Validation Loss  4.8797454833984375
+checkpoint_dir ='./small3-qa/small3qa-epoch-200-2023-04-20 22:04:28.289612'# 2 layer forzen QA trainng
+#Averge Loss: 0.7457916498184204 Avg Validation Loss  4.505360126495361
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2',model_max_length=1024,padding_side='left')
 tokenizer.add_special_tokens({'pad_token': '[PAD]'}) # note we have used this while training
 model = GPT2LMHeadModel.from_pretrained(checkpoint_dir,pad_token_id=50257)
@@ -74,7 +78,9 @@ while True:
       test_output = model.generate(input_ids=encoded_input.input_ids.to(device), 
                     attention_mask = encoded_input.attention_mask.to(device),
                     max_length=250,
-                    num_return_sequences=1)
+                    num_return_sequences=1,
+                    early_stopping=True)
+
       test_answer = tokenizer.decode(test_output[0], skip_special_tokens=True)
       log.info(f"Generated : {test_answer}")
       cprint(f"Question: {question}\n", 'green')

@@ -47,7 +47,8 @@ log.info(f"len_test_data={len_test_data}")
 # Load the model to fine tune
 
 model_name = 'small3qa'
-checkpoint_dir ='./small3-gpt2-5/gpt2-epoch-100-2023-04-19 13:57:47.849368'
+checkpoint_dir ='./small3-gpt2-6/gpt2-epoch-100-2023-04-20 20:18:24.745599'
+#Train and Validation Epoch 99 complete. Averge Loss: 0.042421263250473296 Avg Validation Loss  7.4407037734985355
 model = GPT2LMHeadModel.from_pretrained(checkpoint_dir)
 model.resize_token_embeddings(len(tokenizer))
 
@@ -56,7 +57,7 @@ model.resize_token_embeddings(len(tokenizer))
 
 for parameter in model.parameters():
     parameter.requires_grad = False
-n = 8  # last four layers
+n = 10  # last 2 layers
 for i, m in enumerate(model.transformer.h):
     # Only un-freeze the last n transformer blocks
     if i >= n:
