@@ -70,7 +70,7 @@ def printTokenizerDetails(tokenizer):
 
 # from Karpathy and modified
 # https://github.com/karpathy/nanoGPT/blob/086ebe1822791b775e951b4b562fbb7131d83cc2/train.py
-def get_batch(len_train_data,input_ids,attention_mask,device,block_size=1024,
+def get_random_batch(len_train_data,input_ids,attention_mask,device,block_size=1024,
                     batch_size=12):
     # random select from training data set
     ix = torch.randint(0,len_train_data-block_size , (batch_size,))
@@ -84,6 +84,19 @@ def get_batch(len_train_data,input_ids,attention_mask,device,block_size=1024,
         x, y = x.to(device), y.to(device)
     return x, y
 
+def get_batch(len_train_data,input_ids,attention_mask,index,block_size=1024,
+                    batch_size=12):
+    # random select from training data set
+    ix =[index]
+    next =index
+    for _ in range(0,batch_size-1):
+        next += block_size 
+        if next + block_size <= len_train_data: # since we are using i:i+block_size
+            ix.append(next)
+    x = torch.stack([(input_ids[i:i+block_size]) for i in ix])
+    y = torch.stack([((attention_mask[i:i+block_size])) for i in ix])
+    # trying with a random attention mask -
+    return x, y
 # Unsupervised denoising training
 # From huggingface github
 # https://github.com/huggingface/transformers/blob/4c5c0af7e5280ad5c78d698e3808ee0a543b7262/examples/flax/language-modeling/run_t5_mlm_flax.py#L339

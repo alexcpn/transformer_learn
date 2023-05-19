@@ -15,9 +15,9 @@ torch.set_float32_matmul_precision('low')
 # torch._dynamo.config.verbose = True
 
 time_hash=str(datetime.now()).strip()
-outfile = "./training/training_" +time_hash +".log"
+outfile = "./logs/training_" +time_hash +".log"
 log.basicConfig(
-    level=log.INFO,
+    level=log.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         log.FileHandler(outfile),
@@ -26,27 +26,24 @@ log.basicConfig(
 )
 
 model_name = 't5-base'
-#model_name = 'google/t5-small-ssm-nq'
 log.info(f"Model Name {model_name}")
 tokenizer = T5Tokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token
 
 # Read the cleaned input text
-# original data Canon Camera manual https://gdlp01.c-wss.com/gds/0/0300004730/02/eosrt3-eos1100d-im2-c-en.pdf
-#input_file_path = './data/clean2.txt' # manually cleaned the indices part
-# original data https://www.gutenberg.org/files/17921/17921-0.txt as is
-input_file_path = './data/17921-0-cleaned.txt'
+input_file_path = './data/small_3.txt'
 with open(input_file_path, 'r') as f:
     input_text = f.read()
 log.info(f"Training data {input_file_path}")
-log.info(f"length of dataset in words: {len(input_text):,}") #252,023
+log.info(f"length of dataset in words: {len(input_text):,}")
 encoding = tokenizer(input_text, truncation=False, padding=True,return_tensors='pt')
 log.info(f"encoding.input_ids.shape {encoding.input_ids.shape}")
 log.info(f"encoding.attention_mask.shape {encoding.attention_mask.shape}")
 len_train_data = encoding.input_ids.shape[1]
 log.info(f"length of dataset in tokens = {len_train_data}")
 # Add a test prompt to check over-fitting
-test_prompt = 'complete:I love walking with my' # for t5-base
+#test_prompt = 'complete:I love walking with my' # for t5-base
+test_prompt = 'injections of antitoxic sera lasts only' # for t5-base
 test_prompt_encoded = tokenizer(test_prompt, truncation=True, padding=False, return_tensors="pt")
 # Gandhi was born in 1867. He was the son of a farmer and a merchant. He was educated at the University of Delhi. He was a member of the Indian National Congress. He was a member
 # flatten the tensor from  torch.Size([1, xx]) to  torch.Size([xxx])
@@ -121,8 +118,12 @@ for epoch in range(num_train_epochs):
         x, l, y= get_batch_denoised(len_train_data,input_ids,
              attention_mask,device,block_size,train_batch_size,
              len(tokenizer),tokenizer.eos_token_id)
-        #print(f"input_ids={x.shape}, labels={l.shape}, attention_mask={y.shape}")
         outputs = model(input_ids=x,attention_mask=y,labels=l)
+        # for i in range(train_batch_size):
+        #     input_ids_decoded = tokenizer.decode(x[i,:].squeeze(), skip_special_tokens=False)
+        #     labels_decoded = tokenizer.decode(l[i,:].squeeze(), skip_special_tokens=False)
+        #     log.debug(f"input_ids_decoded={input_ids_decoded} labels_decoded={labels_decoded}")
+        # continue
         loss = outputs.loss
         loss.backward()
         #torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
@@ -130,7 +131,7 @@ for epoch in range(num_train_epochs):
         #lr_scheduler.step()
         optimizer.zero_grad()
     # Save the model checkpoint every 10th
-    checkpoint_dir = f"./test5-t5/{model_name}-epoch-{epoch+1}-{time_hash}"
+    checkpoint_dir = f"./models/test5-t5/{model_name}-epoch-{epoch+1}-{time_hash}"
     model.save_pretrained(checkpoint_dir)
     log.info(f"Epoch {epoch} complete. Loss: {loss.item()} saving {checkpoint_dir}")
     model.eval()
@@ -142,7 +143,7 @@ for epoch in range(num_train_epochs):
     model.train()
     #delete the previous save epoch
     #if epoch % 10 != 0: # skip some model deletes 10,20 etc
-    checkpoint_dir = f"./test5-t5/{model_name}-epoch-{epoch}-{time_hash}"
+    checkpoint_dir = f"./models/test5-t5/{model_name}-epoch-{epoch}-{time_hash}"
     try:
         shutil.rmtree(checkpoint_dir)
     except:

@@ -2,28 +2,39 @@
 from transformers import T5ForConditionalGeneration ,T5Tokenizer
 import torch
 import shutil
-from utils import get_batch
+from utils import get_random_batch
 from transformers import  get_linear_schedule_with_warmup # for training
+import logging as log
+from datetime import datetime
+
+time_hash = str(datetime.now()).strip()
+outfile = "./logs/training_" + time_hash + ".log"
+log.basicConfig(
+    level=log.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        log.FileHandler(outfile),
+        log.StreamHandler()
+    ]
+)
 
 model_name = 't5-small'
 tokenizer = T5Tokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token
-#printTokenizerDetails(tokenizer) # model_max_length: 1024 # vocab_size: 50257
 
 # Read the cleaned input text
-# original data Canon Camera manual https://gdlp01.c-wss.com/gds/0/0300004730/02/eosrt3-eos1100d-im2-c-en.pdf
-input_file_path = './data/clean1.txt'
+input_file_path = './data/small_3.txt'
 with open(input_file_path, 'r') as f:
     input_text = f.read()
-print(f"length of dataset in words: {len(input_text):,}") #252,023
+log.info(f"length of dataset in words: {len(input_text):,}") #252,023
 
 encoding = tokenizer(input_text, truncation=False, padding=True,return_tensors='pt')
-print(f"encoding.input_ids.shape {encoding.input_ids.shape}")
+log.info(f"encoding.input_ids.shape {encoding.input_ids.shape}")
 #encoding.input_ids.shape torch.Size([1, 48735])
 
-print(f"encoding.attention_mask.shape {encoding.attention_mask.shape}")
+log.info(f"encoding.attention_mask.shape {encoding.attention_mask.shape}")
 len_train_data = encoding.input_ids.shape[1]
-print(f"len_train_data = {len_train_data}")
+log.info(f"len_train_data = {len_train_data}")
 
  # flatten the tensor from  torch.Size([1, 48735]) to  torch.Size([48735])
 input_ids=encoding.input_ids.view(-1)
@@ -49,10 +60,9 @@ model.to(device)
 # learning_rate = 6e-4 # ??
 #optimizer = torch.optim.Adam(model.parameters(), lr=3e-5) - use get_linear_schedule_with_warmup
 
-# use the data from ChatGPT - need to recheck this
 # Set up the training parameters
 train_batch_size = 4
-num_train_epochs = 5
+num_train_epochs = 100
 num_warmup_steps = 100
 max_grad_norm = 1.0
 
@@ -61,14 +71,14 @@ optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
 num_train_steps = len_train_data // train_batch_size * num_train_epochs
 lr_scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps, num_train_steps)
 
-num_train_epochs =5
+num_train_epochs =50
 model.train()
 for epoch in range(num_train_epochs):
-    print(f"Epoch {epoch+1} of {num_train_epochs}")
+    log.info(f"Epoch {epoch+1} of {num_train_epochs}")
     epoch_loss = 0
     for i in range(0,len_train_data, block_size):
         # do the batch size manipulation here
-        x,y= get_batch(len_train_data,input_ids,attention_mask,device,block_size=block_size,batch_size=train_batch_size)
+        x,y= get_random_batch(len_train_data,input_ids,attention_mask,device,block_size=block_size,batch_size=train_batch_size)
         #x.shape=torch.Size([batch_size, blocksize])
         
         # attention_mask given by tokenize is array of ones= [1,1,..], that is attend to all tokens
@@ -84,12 +94,13 @@ for epoch in range(num_train_epochs):
         optimizer.step()
         lr_scheduler.step()
         optimizer.zero_grad()
-    print(f"Epoch {epoch} complete. Loss: {loss.item()}")
+    log.info(f"Epoch {epoch} complete. Loss: {loss.item()}")
     # Save the model checkpoint every 10th
-    checkpoint_dir = f"./training/{model_name}-epoch-{epoch+1}"
+    checkpoint_dir = f"./models/{model_name}-epoch-{epoch+1}"
     model.save_pretrained(checkpoint_dir)
+    log.info(f"Model saved at {checkpoint_dir}")
     # delete the previous save epoch
-    checkpoint_dir = f"./training/{model_name}-epoch-{epoch}"
+    checkpoint_dir = f"./models/{model_name}-epoch-{epoch}"
     try:
         shutil.rmtree(checkpoint_dir)
     except:

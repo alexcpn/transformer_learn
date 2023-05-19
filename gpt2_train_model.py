@@ -1,8 +1,8 @@
 # Module to train the model
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from transformers import AutoModelForCausalLM, GPT2Tokenizer
 import torch
 import shutil
-from utils import get_batch
+from utils import get_random_batch,get_batch
 import logging as log
 from datetime import datetime
 import torch._dynamo.config
@@ -18,7 +18,7 @@ torch.backends.cuda.matmul.allow_tf32 = True
 # ---------------Initialise Logging--------------------------------------------
 
 time_hash = str(datetime.now()).strip()
-outfile = "./training/training_" + time_hash + ".log"
+outfile = "./logs/training_" + time_hash + ".log"
 log.basicConfig(
     level=log.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -38,7 +38,7 @@ tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 
 # --------------- Read the Pre-processed Input text data ----------------------
 
-input_file_path = './data/small_3.txt'
+input_file_path = './data/17921-0-cleaned.txt'
 with open(input_file_path, 'r') as f:
     input_text = f.read()
 
@@ -89,7 +89,7 @@ log.info(f"length of test dataset in tokens = {len_test_data}")
 
 # ---------------- Load the  model --------------------------------------------
 
-model = GPT2LMHeadModel.from_pretrained(model_name, pad_token_id=50257)
+model = AutoModelForCausalLM.from_pretrained(model_name, pad_token_id=50257)
 # see https://stackoverflow.com/a/76045898/429476
 model.resize_token_embeddings(len(tokenizer))
 
@@ -118,12 +118,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # ----------Use Pytorch 2.0 if possible to optimize----------------------------
 
-# # We could optimize training using Pytorch 2.0
-# # It neds cuda 11.6+ ,  it crashes as of now
-# if int(re.search(r'\d+', torch.__version__).group()) >= 2:
-#     # for pytorch 2.0
-#     model =torch.compile(model)
-#     log.info(f"Compiled the model for speed up")
+# We could optimize training using Pytorch 2.0
+# It neds cuda 11.6+ ,  it crashes as of now
+import re
+if int(re.search(r'\d+', torch.__version__).group()) >= 2:
+    # for pytorch 2.0
+    model =torch.compile(model)
+    log.info(f"Compiled the model for speed up")
 
 # -------- Load model and later data to device (GPU if available)--------------
 model.to(device)
@@ -131,11 +132,11 @@ model.eval()
 
 # ------------- Add a test prompt to check over-fitting while training---------
 
-test_prompt = 'Formation of Granulation Tissue'
+test_prompt = 'The  peritoneum  of hydrocele and hernial sacs and of the omentum readily lends itself to'
 prompt_encoded = tokenizer(test_prompt, truncation=True, padding=False,
                            return_tensors="pt")
 test_output = model.generate(input_ids=prompt_encoded.input_ids.to(device),
-                             max_length=50,
+                             max_new_tokens=50,
                              num_return_sequences=1)  # todo check the params here
 test_answer = tokenizer.decode(test_output[0], skip_special_tokens=True)
 log.info(f"Over-fit check answer before training: {test_answer}")
@@ -145,8 +146,8 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
 # ------------ Set up the training parameters----------------------------------
 
-num_train_epochs = 100  # 100 increase this if data is small
-train_batch_size = 4  # reduce this if you run out of memory
+num_train_epochs = 200  # 100 increase this if data is small
+train_batch_size = 8  # reduce this if you run out of memory
 train_block_size = len_train_data-1  # this is how much text in each batch
 if len_train_data > tokenizer.model_max_length:
     train_block_size = int(tokenizer.model_max_length/4)  # tokenizer.model_max_length=1024
@@ -154,7 +155,7 @@ num_train_steps = len_train_data // train_batch_size * num_train_epochs
 log.info(f"len_train_data={len_train_data} train_block_size ={train_block_size}"
         +f" train_batch_size= {train_batch_size}")
 
-test_batch_size = 4
+test_batch_size = 12
 test_block_size = train_block_size
 num_test_steps = len_test_data // test_batch_size * num_train_epochs
 log.info(f"len_test_data={len_train_data} test_block_size ={test_block_size}"+
@@ -177,15 +178,25 @@ for epoch in range(num_train_epochs):
     epoch_loss = 0
     count =0
     # For each Epoch go randomly through parts of the data based on block size
-    for i in range(0, len_train_data, train_block_size):
+    for i in range(0, len_train_data, train_block_size*train_batch_size):
         count += 1
         # Get data in random per batch from input
         # not all training data may not be covered in one epoch here
         x, y = get_batch(len_train_data, train_input_ids, train_attention_mask,
-                         device, block_size=train_block_size,
+                         i, block_size=train_block_size,
                          batch_size=train_batch_size)
+        # test for get_batch
+        # for i in range(train_batch_size): # there may not be a full batch
+        #     input_dec = tokenizer.decode(x[i,:].squeeze(), skip_special_tokens=False)
+        #     log.info(f"Decoded check: {i} {input_dec}")# correct
+        # continue
         # attention_mask given by tokenize is array of ones= [1,1,..],
         # that is attend to all tokens
+        if device.type == 'cuda':
+            # pin arrays x,y, which allows us to move them to GPU asynchronously (non_blocking=True)
+            x, y = x.pin_memory().to(device, non_blocking=True), y.pin_memory().to(device, non_blocking=True)
+        else:
+            x, y = x.to(device), y.to(device)
         outputs = model(input_ids=x, attention_mask=y, labels=x)
         loss = outputs.loss
         epoch_loss += loss.item()
@@ -200,17 +211,17 @@ for epoch in range(num_train_epochs):
 
     model.eval()  # Set model to Eval loop
     test_output = model.generate(input_ids=prompt_encoded.input_ids.to(device),
-                                 max_length=100,
+                                 max_new_tokens=100,
                                  num_return_sequences=1)
     test_answer = tokenizer.decode(test_output[0], skip_special_tokens=True)
     log.info(f"Over-fit check answer: {test_answer}")
 
     # --------- Save current Epoch and Delete Previous Epoch-------------------
-    checkpoint_dir = f"./small3-gpt2-6/{model_name}-epoch-{epoch+1}-{time_hash}"
+    checkpoint_dir = f".model/medical-gpt2-1/{model_name}-epoch-{epoch+1}-{time_hash}"
     model.save_pretrained(checkpoint_dir)
     log.info(f"Saved Model at {checkpoint_dir}")
     try:
-        checkpoint_dir = f"./small3-gpt2-6/{model_name}-epoch-{epoch}-{time_hash}"
+        checkpoint_dir = f"./medical-gpt2-1/{model_name}-epoch-{epoch}-{time_hash}"
         shutil.rmtree(checkpoint_dir)
     except:
         pass
@@ -220,9 +231,9 @@ for epoch in range(num_train_epochs):
     validation_loss = 0
     count = 0
     with torch.no_grad():
-        for i in range(0, len_test_data, test_block_size):
+        for i in range(0, len_test_data, test_block_size*test_batch_size):
             count += 1
-            x, y = get_batch(len_test_data, test_input_ids, test_attention_mask, device,
+            x, y = get_batch(len_test_data, test_input_ids, test_attention_mask,device,i,
                              block_size=test_block_size, batch_size=test_batch_size)
             outputs = model(input_ids=x, attention_mask=y, labels=x)
             validation_loss += outputs.loss.item()

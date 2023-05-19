@@ -2,7 +2,7 @@
 from transformers import LlamaTokenizer, AutoModelForCausalLM
 import torch
 import shutil
-from utils import get_batch
+from utils import get_random_batch
 from transformers import  get_linear_schedule_with_warmup # for training
 import logging as log
 from datetime import datetime
@@ -114,7 +114,7 @@ with autocast(dtype=torch.bfloat16):
         for i in range(0,len_train_data, block_size):
             # Get data in random per batch from input
             # not all training data may not be covered in one epoch here
-            x,y= get_batch(len_train_data,input_ids,attention_mask,device,
+            x,y= get_random_batch(len_train_data,input_ids,attention_mask,device,
                 block_size=block_size,batch_size=train_batch_size)
             # attention_mask given by tokenize is array of ones= [1,1,..], that is attend to all tokens
             outputs = model(input_ids=x,attention_mask=y,labels=x)
