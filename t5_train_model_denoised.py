@@ -1,5 +1,6 @@
 # Module to train the model
 from transformers import T5ForConditionalGeneration, T5Tokenizer
+#from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 import torch
 import shutil
 from utils import get_batch_denoised
@@ -25,7 +26,9 @@ log.basicConfig(
     ]
 )
 
-model_name = 't5-base'
+#model_name = 't5-base'
+model_name = "google/flan-t5-base"
+
 log.info(f"Model Name {model_name}")
 tokenizer = T5Tokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token
@@ -43,9 +46,8 @@ len_train_data = encoding.input_ids.shape[1]
 log.info(f"length of dataset in tokens = {len_train_data}")
 # Add a test prompt to check over-fitting
 #test_prompt = 'complete:I love walking with my' # for t5-base
-test_prompt = 'injections of antitoxic sera lasts only' # for t5-base
+test_prompt = 'In pneumococcal and typhoid infections, also, the organisms may be found where ?' # for t5-base
 test_prompt_encoded = tokenizer(test_prompt, truncation=True, padding=False, return_tensors="pt")
-# Gandhi was born in 1867. He was the son of a farmer and a merchant. He was educated at the University of Delhi. He was a member of the Indian National Congress. He was a member
 # flatten the tensor from  torch.Size([1, xx]) to  torch.Size([xxx])
 input_ids=encoding.input_ids.view(-1)
 attention_mask=encoding.attention_mask.view(-1)
@@ -57,23 +59,18 @@ attention_mask=encoding.attention_mask.view(-1)
 # Load the T5 model 
 model = T5ForConditionalGeneration.from_pretrained(model_name)
 
-# # Freeze bottom n layers
-# #https://towardsdatascience.com/conditional-text-generation-by-fine-tuning-gpt-2-11c1a9fc639d
+# Freeze all the layers of the T5 model
+for param in model.encoder.block.parameters():
+    param.requires_grad = False
 
-
-# # Freeze all the layers of the T5 model
-# for param in model.encoder.block.parameters():
-#     param.requires_grad = False
-
-# # Unfreeze the last total
-# n =8 # last four layers  for t5-base 12 layer
-# #n =22 # last four layers for t5-large 24 layers
-# for i, m in enumerate(model.encoder.block):        
-#     #Only un-freeze the last n transformer blocks
-#     if i >= n:
-#         for parameter in m.parameters():
-#             parameter.requires_grad = True 
-#         log.info(f"Un-freezed layer {i} for training")
+#Unfreeze the bottom n layer
+n =4 # last n layers  for t5-model
+for i, m in enumerate(model.encoder.block):        
+    #Only un-freeze the last n transformer blocks
+    if i < n:
+        for parameter in m.parameters():
+            parameter.requires_grad = True 
+        log.info(f"Un-freezed layer {i} for training")
 
 # Fine-tune the model on the training data
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -99,7 +96,7 @@ train_batch_size =8
 block_size = len_train_data-1
 if len_train_data > tokenizer.model_max_length:
     block_size = int(tokenizer.model_max_length/4) #/4 for t5-base tokenizer.model_max_length=1024
-num_train_epochs = 100
+num_train_epochs = 50
 
 # Set the optimizer and learning rate scheduler
 # num_warmup_steps = 100
@@ -125,15 +122,17 @@ for epoch in range(num_train_epochs):
         #     log.debug(f"input_ids_decoded={input_ids_decoded} labels_decoded={labels_decoded}")
         # continue
         loss = outputs.loss
+        epoch_loss += loss.item()
         loss.backward()
         #torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
         optimizer.step()
         #lr_scheduler.step()
         optimizer.zero_grad()
     # Save the model checkpoint every 10th
-    checkpoint_dir = f"./models/test5-t5/{model_name}-epoch-{epoch+1}-{time_hash}"
+    checkpoint_dir = f"./models/flan-t5b/{model_name}-epoch-{epoch+1}-{time_hash}"
     model.save_pretrained(checkpoint_dir)
-    log.info(f"Epoch {epoch} complete. Loss: {loss.item()} saving {checkpoint_dir}")
+    average_epch_loss = epoch_loss/num_train_epochs
+    log.info(f"Epoch {epoch} complete. Loss: {average_epch_loss} saving {checkpoint_dir}")
     model.eval()
     # Check if the model has over-fitted
     test_output = model.generate(input_ids = test_prompt_encoded.input_ids.to(device),
@@ -143,7 +142,7 @@ for epoch in range(num_train_epochs):
     model.train()
     #delete the previous save epoch
     #if epoch % 10 != 0: # skip some model deletes 10,20 etc
-    checkpoint_dir = f"./models/test5-t5/{model_name}-epoch-{epoch}-{time_hash}"
+    checkpoint_dir = f"./models/flan-t5b/{model_name}-epoch-{epoch}-{time_hash}"
     try:
         shutil.rmtree(checkpoint_dir)
     except:

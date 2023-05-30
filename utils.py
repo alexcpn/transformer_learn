@@ -70,18 +70,12 @@ def printTokenizerDetails(tokenizer):
 
 # from Karpathy and modified
 # https://github.com/karpathy/nanoGPT/blob/086ebe1822791b775e951b4b562fbb7131d83cc2/train.py
-def get_random_batch(len_train_data,input_ids,attention_mask,device,block_size=1024,
+def get_random_batch(len_train_data,input_ids,attention_mask,block_size=1024,
                     batch_size=12):
     # random select from training data set
     ix = torch.randint(0,len_train_data-block_size , (batch_size,))
     x = torch.stack([(input_ids[i:i+block_size]) for i in ix])
     y = torch.stack([((attention_mask[i:i+block_size])) for i in ix])
-    # trying with a random attention mask -
-    if device.type == 'cuda':
-        # pin arrays x,y, which allows us to move them to GPU asynchronously (non_blocking=True)
-        x, y = x.pin_memory().to(device, non_blocking=True), y.pin_memory().to(device, non_blocking=True)
-    else:
-        x, y = x.to(device), y.to(device)
     return x, y
 
 def get_batch(len_train_data,input_ids,attention_mask,index,block_size=1024,

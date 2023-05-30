@@ -2,7 +2,7 @@
 from transformers import T5ForConditionalGeneration ,T5Tokenizer
 import torch
 import shutil
-from utils import  get_batch
+from utils import get_random_batch, get_batch
 from transformers import  get_linear_schedule_with_warmup # for training
 import logging as log
 from datetime import datetime
@@ -49,8 +49,7 @@ attention_mask=encoding.attention_mask.view(-1)
 block_size = int(tokenizer.model_max_length/8) # tokenizer.model_max_length=1024
 
 # Load the T5 model 
-#model = T5ForConditionalGeneration.from_pretrained(model_name,device_map="auto", torch_dtype=torch.float16)
-model = T5ForConditionalGeneration.from_pretrained(model_name,device_map="auto")
+model = T5ForConditionalGeneration.from_pretrained(model_name)
 
 num_encoder_layers = len(model.encoder.block)  
 num_decoder_layers = len(model.decoder.block)  
@@ -62,11 +61,6 @@ for param in model.parameters():
 # Un-Freeze lower 4 layers of encoder (lower is unfreezed)
 for i in range(0,num_encoder_layers-8,1):
     for param in model.encoder.block[i].parameters():
-        param.requires_grad = True
-
-# Un-Freeze lower 4 layers of encoder (lower is unfreezed)
-for i in range(0,num_decoder_layers-8,1):
-    for param in model.decoder.block[i].parameters():
         param.requires_grad = True
 
 for name, param in model.named_parameters():
@@ -81,7 +75,7 @@ model.to(device)
 
 # Set up the training parameters
 train_batch_size = 4
-num_train_epochs = 10
+num_train_epochs = 50
 
 # -----------Initialize optimizer and learning rate----------------------------
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
@@ -93,51 +87,34 @@ max_grad_norm = 1.0
 
 log.info(f"Batch Size {train_batch_size} Block Size {block_size} Epochs {num_train_epochs} Steps= {num_train_steps}")
 model.train()
-
-scaler = torch.cuda.amp.GradScaler()
-
 for epoch in range(num_train_epochs):
     log.info(f"Epoch {epoch+1} of {num_train_epochs}")
     epoch_loss = 0
-    for i in range(0, len_train_data, block_size*train_batch_size):
-        # Get data in random per batch from input
-        # not all training data may not be covered in one epoch here
-        x, y = get_batch(len_train_data, input_ids,attention_mask,
-                            i, block_size=block_size,
-                            batch_size=train_batch_size)
-        # test for get_batch
-        # for i in range(train_batch_size): # there may not be a full batch
-        #     input_dec = tokenizer.decode(x[i,:].squeeze(), skip_special_tokens=False)
-        #     log.info(f"Decoded check: {i} {input_dec}")# correct
-        # continue
-        # attention_mask given by tokenize is array of ones= [1,1,..],
-        # that is attend to all tokens
+    for i in range(0,len_train_data, block_size):
+        # do the batch size manipulation here
+        x,y= get_random_batch(len_train_data,input_ids,attention_mask,\
+            block_size=block_size,batch_size=train_batch_size)
+        #x.shape=torch.Size([batch_size, blocksize])
+        # attention_mask given by tokenize is array of ones= [1,1,..], that is attend to all tokens
         if device.type == 'cuda':
             # pin arrays x,y, which allows us to move them to GPU asynchronously (non_blocking=True)
             x, y = x.pin_memory().to(device, non_blocking=True), y.pin_memory().to(device, non_blocking=True)
         else:
-            x, y = x.to(device), y.to(device) 
-
-        # for FP 16 training
-        #with torch.autocast(device_type=device.type): #(device_type='cuda', dtype=torch.float16):
-        outputs = model(input_ids=x, attention_mask=y, labels=x)
+            x, y = x.to(device), y.to(device)
+        outputs = model(input_ids=x,attention_mask=y,labels=x)
         loss = outputs.loss
         epoch_loss += loss.item()
-
-        #scaler.scale(loss).backward() # for FP 16 training
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm) # for FP 16 training especially
-        #scaler.step(optimizer) # for FP 16 training
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
         optimizer.step()
-        # lr_scheduler.step()
-        # Updates the scale for next iteration.
-        #scaler.update() # for FP 16 training
+        #lr_scheduler.step()
         optimizer.zero_grad()
-    avg_epoch_loss = epoch_loss /(len_train_data/(block_size*train_batch_size))
-    log.info(f"Train Epoch {epoch} complete.Avg Loss: {avg_epoch_loss}")
-    if avg_epoch_loss < .006:
+    average_epch_loss = epoch_loss/num_train_epochs
+    log.info(f"Epoch {epoch} complete. Average Loss: {average_epch_loss}")
+    if average_epch_loss < .001:
         log.info("Average epoch loss is very low,stopping training")
         break
+
 
     # Save the model checkpoint every 10th
     checkpoint_dir = f"./models/flan-t5-2/{model_name}-epoch-{epoch+1}-{time_hash}"

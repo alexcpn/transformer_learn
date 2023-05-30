@@ -1,4 +1,4 @@
-# Module to train the model
+# Module to train the model with a QA type dataset
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 import torch
 import shutil
