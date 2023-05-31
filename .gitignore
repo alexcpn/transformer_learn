@@ -1,6 +1,4 @@
 __pycache__/utils.cpython-310.pyc
-training/*
-test/*
-test-**/
-test**/**
-results/**
+logs/*
+models/**
+data/cached_**

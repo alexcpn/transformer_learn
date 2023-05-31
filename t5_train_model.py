@@ -64,7 +64,7 @@ for i in range(0,num_encoder_layers-8,1):
     for param in model.encoder.block[i].parameters():
         param.requires_grad = True
 
-# Un-Freeze lower 4 layers of encoder (lower is unfreezed)
+# Un-Freeze lower 4 layers of decoder (lower is unfreezed)
 for i in range(0,num_decoder_layers-8,1):
     for param in model.decoder.block[i].parameters():
         param.requires_grad = True
@@ -81,7 +81,7 @@ model.to(device)
 
 # Set up the training parameters
 train_batch_size = 4
-num_train_epochs = 10
+num_train_epochs = 100
 
 # -----------Initialize optimizer and learning rate----------------------------
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
@@ -94,7 +94,16 @@ max_grad_norm = 1.0
 log.info(f"Batch Size {train_batch_size} Block Size {block_size} Epochs {num_train_epochs} Steps= {num_train_steps}")
 model.train()
 
-scaler = torch.cuda.amp.GradScaler()
+#scaler = torch.cuda.amp.GradScaler()
+
+def shift_tokens_right(input_ids, pad_token_id):
+    """ Shift input ids one token to the right, and add pad token at the first position """
+    shifted_input_ids = input_ids.clone()
+
+    shifted_input_ids[:, 1:] = input_ids[:, :-1].clone()
+    shifted_input_ids[:, 0] = pad_token_id
+
+    return shifted_input_ids
 
 for epoch in range(num_train_epochs):
     log.info(f"Epoch {epoch+1} of {num_train_epochs}")
@@ -105,11 +114,7 @@ for epoch in range(num_train_epochs):
         x, y = get_batch(len_train_data, input_ids,attention_mask,
                             i, block_size=block_size,
                             batch_size=train_batch_size)
-        # test for get_batch
-        # for i in range(train_batch_size): # there may not be a full batch
-        #     input_dec = tokenizer.decode(x[i,:].squeeze(), skip_special_tokens=False)
-        #     log.info(f"Decoded check: {i} {input_dec}")# correct
-        # continue
+    
         # attention_mask given by tokenize is array of ones= [1,1,..],
         # that is attend to all tokens
         if device.type == 'cuda':
@@ -120,7 +125,16 @@ for epoch in range(num_train_epochs):
 
         # for FP 16 training
         #with torch.autocast(device_type=device.type): #(device_type='cuda', dtype=torch.float16):
-        outputs = model(input_ids=x, attention_mask=y, labels=x)
+        pad_token_id = model.config.pad_token_id
+        sx = shift_tokens_right(x,pad_token_id)
+
+        # for i in range(train_batch_size): # there may not be a full batch
+        #      input_dec = tokenizer.decode(x[i,:].squeeze(), skip_special_tokens=False)
+        #      log.info(f"Decoded x :{i} '{input_dec}'")# correct
+        #      input_dec = tokenizer.decode(sx[i,:].squeeze(), skip_special_tokens=False)
+        #      log.info(f"Sifted x(=sx):{i} '{input_dec}'")# correct
+
+        outputs = model(input_ids=sx, attention_mask=y, labels=x)
         loss = outputs.loss
         epoch_loss += loss.item()
 
@@ -144,11 +158,10 @@ for epoch in range(num_train_epochs):
     model.save_pretrained(checkpoint_dir)
     log.info(f"Model saved at {checkpoint_dir}")
     # delete the previous save epoch, except middle point
-    if epoch != 25:
-        checkpoint_dir = f"./models/flan-t5-2/{model_name}-epoch-{epoch}-{time_hash}"
-        try:
-            shutil.rmtree(checkpoint_dir)
-        except:
-            pass
+    checkpoint_dir = f"./models/flan-t5-2/{model_name}-epoch-{epoch}-{time_hash}"
+    try:
+        shutil.rmtree(checkpoint_dir)
+    except:
+        pass
 
 
