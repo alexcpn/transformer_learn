@@ -2,7 +2,7 @@
 from transformers import T5ForConditionalGeneration ,T5Tokenizer
 import torch
 import shutil
-from utils import  get_batch
+from utils import  get_batch,shift_tokens_right
 from transformers import  get_linear_schedule_with_warmup # for training
 import logging as log
 from datetime import datetime
@@ -96,15 +96,6 @@ model.train()
 
 #scaler = torch.cuda.amp.GradScaler()
 
-def shift_tokens_right(input_ids, pad_token_id):
-    """ Shift input ids one token to the right, and add pad token at the first position """
-    shifted_input_ids = input_ids.clone()
-
-    shifted_input_ids[:, 1:] = input_ids[:, :-1].clone()
-    shifted_input_ids[:, 0] = pad_token_id
-
-    return shifted_input_ids
-
 for epoch in range(num_train_epochs):
     log.info(f"Epoch {epoch+1} of {num_train_epochs}")
     epoch_loss = 0
@@ -125,8 +116,8 @@ for epoch in range(num_train_epochs):
 
         # for FP 16 training
         #with torch.autocast(device_type=device.type): #(device_type='cuda', dtype=torch.float16):
-        pad_token_id = model.config.pad_token_id
-        sx = shift_tokens_right(x,pad_token_id)
+        #pad_token_id = model.config.pad_token_id
+        #sx = shift_tokens_right(x,pad_token_id)
 
         # for i in range(train_batch_size): # there may not be a full batch
         #      input_dec = tokenizer.decode(x[i,:].squeeze(), skip_special_tokens=False)
@@ -134,7 +125,7 @@ for epoch in range(num_train_epochs):
         #      input_dec = tokenizer.decode(sx[i,:].squeeze(), skip_special_tokens=False)
         #      log.info(f"Sifted x(=sx):{i} '{input_dec}'")# correct
 
-        outputs = model(input_ids=sx, attention_mask=y, labels=x)
+        outputs = model(input_ids=x, attention_mask=y, labels=x)
         loss = outputs.loss
         epoch_loss += loss.item()
 

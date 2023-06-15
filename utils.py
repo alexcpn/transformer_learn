@@ -2,6 +2,8 @@
 import itertools
 import torch
 import numpy as np
+import math
+
 # Just to understand the tokenizer details
 def printTokenizerDetails(tokenizer):
     print('max_model_input_sizes')
@@ -68,6 +70,15 @@ def printTokenizerDetails(tokenizer):
     print(f'First {num} items of the vocab: {dict(itertools.islice(tokenizer.get_vocab().items(), 20))}')
 
 
+def shift_tokens_right(input_ids, pad_token_id):
+    """ Shift input ids one token to the right, and add pad token at the first position """
+    shifted_input_ids = input_ids.clone()
+
+    shifted_input_ids[:, 1:] = input_ids[:, :-1].clone()
+    shifted_input_ids[:, 0] = pad_token_id
+
+    return shifted_input_ids
+
 # from Karpathy and modified
 # https://github.com/karpathy/nanoGPT/blob/086ebe1822791b775e951b4b562fbb7131d83cc2/train.py
 def get_random_batch(len_train_data,input_ids,attention_mask,block_size=1024,
@@ -80,7 +91,7 @@ def get_random_batch(len_train_data,input_ids,attention_mask,block_size=1024,
 
 def get_batch(len_train_data,input_ids,attention_mask,index,block_size=1024,
                     batch_size=12):
-    # random select from training data set
+    # non random select from training data set
     ix =[index]
     next =index
     for _ in range(0,batch_size-1):
@@ -202,7 +213,7 @@ class FlaxDataCollatorForT5MLM:
 def get_denoised(tokenizer_len,eos_token_id, input_ids,batch_size):
     input_length = input_ids.shape[1] # take the length and skip the batch
     # create the denoiser
-    denoiser = FlaxDataCollatorForT5MLM(tokenizer_len,eos_token_id,.15,3)
+    denoiser = FlaxDataCollatorForT5MLM(tokenizer_len,eos_token_id,.45,3)
     # create random_spans masks [True,False, True ] in shape of batch
     mask_indices = np.asarray([denoiser.random_spans_noise_mask(input_length) for i in range(batch_size)])
     # labels mask is inverse of mask indices
@@ -333,3 +344,24 @@ def get_batch_for_qa_gpt(qa_df_ids,device,tokenizer,batch_size):
     #[INFO] Decoded check: 2 Which famous surgeon emphasized the importance of rest for the restoration of injured parts? [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD]  John Hunter [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD]
     # to now
     # Decoded check: 3 [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] Which tissue is used as a graft to fill defects in the dura mater? The fascia lata of the thigh is widely used as a graft to fill defects in the dura mater. [PAD]
+
+
+
+def segment_text(input_text, segment_size, pad_token='<PAD>'):
+    num_segments = math.ceil(len(input_text) / segment_size)
+    segmented_text = []
+    start_index = 0
+    
+    for _ in range(num_segments):
+        end_index = start_index + segment_size
+        segment = input_text[start_index:end_index]
+        
+        if len(segment) < segment_size:
+            pad_token_count = (segment_size - len(segment))/len(pad_token)
+            pads = round(pad_token_count) * pad_token
+            segment += pads
+        
+        segmented_text.append(segment)
+        start_index = end_index
+    
+    return segmented_text
