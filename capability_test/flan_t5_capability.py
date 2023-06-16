@@ -7,7 +7,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model_name = "google/flan-t5-base"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model_name = "./models/flan-t5-2/google/flan-t5-base-epoch-45-2023-05-30 18:19:52.327485" # encoder+decoder
-model_name = "./models/flan-t5-2/google/flan-t5-base-epoch-44-2023-05-30 20:12:46.912587"
+model_name = "./models/flan-t5-2/google/flan-t5-base-epoch-100-2023-05-31 20:25:06.073126"
 model = AutoModelForSeq2SeqLM.from_pretrained(model_name,device_map="auto")#, torch_dtype=torch.float16)
 config = AutoConfig.from_pretrained(model_name)
 #print("Maximum sequence length this model can handle: ", config)

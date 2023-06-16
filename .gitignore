@@ -2,3 +2,4 @@ __pycache__/utils.cpython-310.pyc
 logs/*
 models/**
 data/cached_**
+collect_env.py

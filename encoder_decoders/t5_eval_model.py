@@ -22,6 +22,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Load the model from the saved checkpoint directory
 #checkpoint_dir = 'models/flan-t5-base-direct/checkpoint-1500' trained with regulare training code
 checkpoint_dir = './models/flan-t5b-nd/google/flan-t5-base-epoch-11-2023-05-23 17:01:30.339737'
+checkpoint_dir ='./models/test/flan_t5_unit'
 model_name = 'google/flan-t5-small'
 tokenizer = T5Tokenizer.from_pretrained(model_name,model_max_length=1024)
 tokenizer.pad_token = tokenizer.eos_token
