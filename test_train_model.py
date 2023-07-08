@@ -11,6 +11,11 @@ class TestTrain(unittest.TestCase):
         self.model_name = "google/flan-t5-base"
         # self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    def test_tokenizer_length(self):
+        model_name = 'gpt2'
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        print("tokenizer.model_max_length",tokenizer.model_max_length)
 
     def test_segment_text(self):
         input_text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."

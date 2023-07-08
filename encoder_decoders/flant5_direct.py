@@ -22,8 +22,9 @@ model = AutoModelForSeq2SeqLM.from_pretrained(model_name,device_map="auto", torc
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 #freeze decoder block
 num_encoder_layers = len(model.encoder.block)  
-num_decoder_layers = len(model.decoder.block)  
+num_decoder_layers = len(model.decoder.block) 
 
+print(f"len num_encoder_layers={num_encoder_layers}")
 
 # # Freeze upper 3 layers of encoder (lower is unfreezed)
 # for i in range(num_encoder_layers-1,num_encoder_layers-4,-1):
@@ -41,12 +42,19 @@ num_decoder_layers = len(model.decoder.block)
 for param in model.parameters():
      param.requires_grad = False
 
-# Un-Freeze lower 4 layers of encoder (lower is unfreezed)
-for i in range(0,num_encoder_layers-11,1):
+# # Un-Freeze lower 4 layers of encoder 
+# for i in range(0,4,1):
+#     for param in model.encoder.block[i].parameters():
+#         param.requires_grad = True
+
+# Un-Freeze higher 1 layers of encoder 
+for i in range(num_decoder_layers-1,num_decoder_layers-2,-1):
     for param in model.encoder.block[i].parameters():
-        param.requires_grad = True
- for name, param in model.named_parameters():
+         param.requires_grad = True
+
+for name, param in model.named_parameters():
     print(name,param.requires_grad)
+
 
 
 #optimizer = torch.optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-5)
