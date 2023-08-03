@@ -138,7 +138,9 @@ if __name__ == '__main__':
     prompt = "The cute dog walks in the green park"
     labels, input_ids = get_denoised(FlaxDataCollatorForT5MLM, tokenizer, prompt)
     print(f"denoised input_ids decoded = {tokenizer.decode(*input_ids,skip_special_tokens=False)}")
+    # denoised input_ids decoded = The cute<extra_id_0> walks<extra_id_1> green<extra_id_2></s>
     print(f"denoised labels decoded   = {tokenizer.decode(*labels,skip_special_tokens=False)}")
+    # denoised labels decoded   = <extra_id_0> dog<extra_id_1> in the<extra_id_2> park</s></s>
     print(f"input_ids.shape {input_ids.shape} labels.shape {labels.shape}") # todo should this be equal
     denoised_input_ids = torch.from_numpy(input_ids)
     denoised_labels = torch.from_numpy(labels)  
@@ -171,7 +173,7 @@ if __name__ == '__main__':
     encoded = tokenizer(test_prompt, truncation=False, padding=False, return_tensors="pt")
     label = tokenizer(label_prompt, truncation=False, padding=False, return_tensors="pt")
     model.train()
-    for epoch in range(100):
+    for epoch in range(50):
         #Method 1 input_id == label (target)
         # outputs = model(input_ids=input_ids,attention_mask=attention_mask,labels=labels)
         # Method 2 - Using the denoised way

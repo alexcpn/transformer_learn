@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Room</title>
+     <style type="text/css">
+        body {
+            display: flex;
+            flex-direction: column;
+            max-height: 100vh;  /* Adjust this value */
+            margin: auto;
+            padding: 20px;  /* Add padding around the chat app */
+            box-sizing: border-box;  /* Include padding and border in element's total width and height */
+
+        }
+        #chat {
+            flex-grow: 1;
+            border: 1px solid #ccc;
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+ 
+        #chat .question {
+            text-align: left;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #c5f0c5e3;
+            display: block;
+            border-radius: 5px;
+        }
+        #chat .response {
+            text-align: left;
+            padding: 5px;
+            margin: 10px 0;
+            background-color: #e4f6e7;
+            display: block;
+            border-radius: 5px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+        }
+        #system_message {
+            width: 100%;
+            height: 40px;
+            color: darkgreen;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="chat"></div>
+    <form id="form">
+        <textarea id="system_message" autocomplete="off">You are a helpful assistant.Please answer the question if it is possible</textarea>
+        <textarea id="input" autocomplete="off"></textarea>
+        <button style="font-size:20px">Submit</button>
+    </form>
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            marked.setOptions({sanitize: false});
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+            $('form').submit(function(e) {
+                e.preventDefault();
+                var input = $('#input').val();
+                var system_message = $('#system_message').val();
+                query = input.replace('\n', '<br>') 
+                $('#chat').append('<p class="question">' + query + '</p>');  // add user input to chat
+                socket.emit('message', {input,system_message});
+                $('#input').val('');
+            });
+            socket.on('response', function(msg) {
+                console.log(msg.response)
+                $('#chat').append('<div class="response">' + marked.parse(msg.response) + '</div>');  // add server response to chat
+                $('#chat').scrollTop($('#chat')[0].scrollHeight);
+            });
+        });
+    </script>
+</body>
+</html>

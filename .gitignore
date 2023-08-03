@@ -3,3 +3,9 @@ logs/*
 models/**
 data/cached_**
 collect_env.py
+encoder_decoders/models/**
+flask/__pycache__/llama2_7b_4bit.cpython-310.pyc
+vector_search/vectorstore/db_faiss/index.faiss
+vector_search/vectorstore/db_faiss/index.pkl
+vector_search/vectorstore/db_faiss2/index.faiss
+vector_search/vectorstore/db_faiss2/index.pkl

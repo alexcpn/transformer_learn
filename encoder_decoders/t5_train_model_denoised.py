@@ -2,13 +2,16 @@
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 #from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 import torch
-import shutil
-from utils import get_batch_denoised
-from transformers import  get_linear_schedule_with_warmup # for training
 import logging as log
 from datetime import datetime
-import re
 import torch._dynamo.config
+import shutil
+from os.path import dirname, abspath
+# Add the parent directory to sys.path
+import sys
+parent_dir = dirname(dirname(abspath(__file__)))
+sys.path.append(parent_dir)
+from utils import get_batch_denoised
 
 print(torch.__version__)
 torch.set_float32_matmul_precision('low')
@@ -16,7 +19,7 @@ torch.set_float32_matmul_precision('low')
 # torch._dynamo.config.verbose = True
 
 time_hash=str(datetime.now()).strip()
-outfile = "./logs/training_" +time_hash +".log"
+outfile = "../logs/training_" +time_hash +".log"
 log.basicConfig(
     level=log.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -26,15 +29,15 @@ log.basicConfig(
     ]
 )
 
-#model_name = 't5-base'
-model_name = "google/flan-t5-base"
+model_name = 't5-small'
+#model_name = "google/flan-t5-base"
 
 log.info(f"Model Name {model_name}")
 tokenizer = T5Tokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token
 
 # Read the cleaned input text
-input_file_path = './data/small_3.txt'
+input_file_path = '../data/small_3.txt'
 with open(input_file_path, 'r') as f:
     input_text = f.read()
 log.info(f"Training data {input_file_path}")
