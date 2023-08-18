@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 from llama2_7b_4bit import LLAMa2_7b_4bitQ
-    import traceback
+import traceback
 
 app = Flask(__name__)
 socketio = SocketIO(app)

@@ -109,7 +109,7 @@ tokenizer = LlamaTokenizer.from_pretrained(model_name)
 
 
 model.eval()
-# give the promot in chat format
+# give the prompt in chat format
 query = "Edge Installation is not starting, what could be wrong ?"
 contexts = query_vectorstore(vectordb,query)
 

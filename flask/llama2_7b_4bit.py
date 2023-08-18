@@ -12,7 +12,7 @@ class LLAMa2_7b_4bitQ:
         if  not torch.cuda.is_available() :
             print("Running 4 bit quantised model is possible only on GPU")
             raise Exception("Cannot Proceed without GPU")
-             
+        torch.backends.cuda.enable_flash_sdp(False)
         ################################################################################
         # bitsandbytes parameters
         ################################################################################
