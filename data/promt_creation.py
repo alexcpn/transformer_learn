@@ -90,11 +90,11 @@ def read_lines_in_chunks(file_path, chunk_size=100):
 
 file_path = 'data/QA.txt'
 
-with open("./data/qa_data_small3.txt", "a") as myfile:
+with open("./data/qa_data_small3.txt", "a", encoding='utf-8') as myfile:
   for chunk in read_lines_in_chunks(file_path, chunk_size=10):
     matches = parse_response_out(chunk)
     for index, (question, answer) in enumerate(matches):
-      out = f"<s>[INST] Source:8989REF {question} [/INST] Source:8989REF {answer} </s>\n"
+      out = f'"<s>[INST] Source:8989REF {question} [/INST] Source:8989REF {answer} </s>"\n'
       myfile.write(out)
 
 
