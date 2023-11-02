@@ -1,3 +1,35 @@
+#nvidia-smi -L
+#GPU 0: NVIDIA GeForce RTX 3060 Laptop GPU (UUID: GPU-3d4037fa-1de1-b359-c959-bfb3d9ecbe50)
+# 
+# $ nvcc --version
+# nvcc: NVIDIA (R) Cuda compiler driver
+# Copyright (c) 2005-2023 NVIDIA Corporation
+# Built on Fri_Jan__6_16:45:21_PST_2023
+# Cuda compilation tools, release 12.0, V12.0.140
+# Build cuda_12.0.r12.0/compiler.32267302_0
+# 
+# $ nvidia-smi
+# Wed Nov  1 17:18:56 2023       
+# +-----------------------------------------------------------------------------+
+# | NVIDIA-SMI 525.105.17   Driver Version: 525.105.17   CUDA Version: 12.0     |
+# |-------------------------------+----------------------+----------------------+
+# | GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+# | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+# |                               |                      |               MIG M. |
+# |===============================+======================+======================|
+# |   0  NVIDIA GeForce ...  Off  | 00000000:01:00.0  On |                  N/A |
+# | N/A   69C    P0    26W /  80W |     56MiB /  6144MiB |      9%      Default |
+# |                               |                      |                  N/A |
+# +-------------------------------+----------------------+----------------------+
+                                                                               
+# +-----------------------------------------------------------------------------+
+# | Processes:                                                                  |
+# |  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+# |        ID   ID                                                   Usage      |
+# |=============================================================================|
+# |    0   N/A  N/A      5319      G   /usr/lib/xorg/Xorg                 55MiB |
+
+
 import torch
 import traceback
 from transformers import (
@@ -8,16 +40,23 @@ from transformers import (
 
 )
 from accelerate import infer_auto_device_map ,init_empty_weights
-import locale
-locale.getpreferredencoding = lambda: "UTF-8"
-import pprint
-from termcolor import  cprint
 
-pp = pprint.PrettyPrinter(width=80)
+usercontext ='''
 
+Given the Context below
 
-class LLAMa2Quantised:
+"""
 
+Cholesterol is a waxy substance found in your blood. Your body needs cholesterol to build healthy cells, but high levels of cholesterol can increase your risk of heart disease.
+
+With high cholesterol, you can develop fatty deposits in your blood vessels. Eventually, these deposits grow, making it difficult for enough blood to flow through your arteries. Sometimes, those deposits can break suddenly and form a clot that causes a heart attack or stroke.
+
+High cholesterol can be inherited, but it's often the result of unhealthy lifestyle choices, which make it preventable and treatable. A healthy diet, regular exercise and sometimes medication can help reduce high cholesterol.
+
+Answer the following question if possible
+What is the role of cholestrol in the body
+'''
+class LLAMa2Q:
     def __init__(self,model_name,q4bitA=True) -> None:
 
         if  not torch.cuda.is_available() :
@@ -75,7 +114,7 @@ class LLAMa2Quantised:
 
         # # Load in 4 bit
         self.model = AutoModelForCausalLM.from_pretrained(model_name, quantization_config=bnb_config,
-                                                    device_map=device_map)
+                                                    device_map=device_map,use_auth_token=True)
 
         #torch.save(self.model.state_dict(), "4bit")
         # Load LLaMA tokenizer
@@ -107,32 +146,21 @@ class LLAMa2Quantised:
         parts = outputcont.split("[/INST]", 1)
         return parts[1]
 
-if __name__ == '__main__':
 
+if __name__ == "__main__":
     print("Going to load the llama2 7b model ...")
-    llam2_4bit = LLAMa2Quantised(model_name="meta-llama/Llama-2-7b-chat-hf",q4bitA=True)
+    llam2_4bit = LLAMa2Q(model_name="meta-llama/Llama-2-7b-chat-hf",q4bitA=True)
     print("Loaded LLama2 7b model")
 
-    while True:
-        cprint('\nPlease ask the question or press q to quit', 'green', attrs=['blink'])
-        question = input()
-        if 'q' == question:
-            print("Exiting")
-            break
-        print(f'Processing Message from input()')
-        prompt = f"{ question}"
-        system_message = "You are a helpful assistant.Please answer the question if it is possible"
-        prompt_template=f'''[INST] <<SYS>>
-        {system_message}
-        <</SYS>>
+    prompt = f"{ usercontext}"
+    system_message = "You are a helpful assistant.Please answer the question if it is possible from the context"
+    prompt_template=f'''[INST] <<SYS>>
+    {system_message}
+    <</SYS>>
 
-        {prompt} [/INST]'''
+    {prompt} [/INST]'''
 
-        prompt_template = llam2_4bit.create_prompt(prompt,system_message)
-        output = llam2_4bit.generate_ouputput(prompt_template)
-        response =llam2_4bit.get_chat_response(output)
-        print(response)
-      
-
-
-
+    prompt_template = llam2_4bit.create_prompt(prompt,system_message)
+    output = llam2_4bit.generate_ouputput(prompt_template)
+    response =llam2_4bit.get_chat_response(output)
+    print(response)
