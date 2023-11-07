@@ -9,3 +9,8 @@ vector_search/vectorstore/db_faiss/index.faiss
 vector_search/vectorstore/db_faiss/index.pkl
 vector_search/vectorstore/db_faiss2/index.faiss
 vector_search/vectorstore/db_faiss2/index.pkl
+data/QA.txt
+capability_test/__pycache__/l**
+capability_test/llama2_7b_4bit_qa_generator_2.py
+capability_test/noc_qa_data2.txt
+data/story3.txt
