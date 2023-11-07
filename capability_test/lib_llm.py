@@ -227,7 +227,7 @@ class MistralQ:
 
         # # Load in 4 bit
         self.model = AutoModelForCausalLM.from_pretrained(model_name, quantization_config=bnb_config,
-                                                    device_map=device_map,use_auth_token=True)
+                                                    device_map=device_map,use_auth_token=False)
         self.model =torch.compile(self.model)
         print(f"Model compiled")
         #torch.save(self.model.state_dict(), "4bit")
@@ -252,35 +252,20 @@ class MistralQ:
         #tokenizer self.tokenizer.bos_token=<s>
         self.tokenizer.pad_token = self.tokenizer.eos_token
 
-    def create_prompt(self,prompt):
+    def create_prompt(self,sample_prompt,sample_response,prompt):
         """
             Showing the formating - as per https://docs.mistral.ai/llm/mistral-instruct-v0.1#chat-template
+            https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.1
             <s>[INST] Instruction [/INST] Model answer</s>[INST] Follow-up instruction [/INST]
-            https://www.promptfoo.dev/docs/guides/mistral-vs-llama/
+            text = "<s>[INST] What is your favourite condiment? [/INST]"
+            "Well, I'm quite partial to a good squeeze of fresh lemon juice. It adds just the right amount of zesty flavour to whatever I'm cooking up in the kitchen!</s> "
+            "[INST] Do you have mayonnaise recipes? [/INST]"
             
-            prompt="Who is Alpacona"
-            tokenizer BOS=tensor([[1, 1]])
-            self.tokenizer.decode BOS <s> =<s><s>
-            self.tokenizer.decode EOS </s> =<s></s>
-            tokenizer self.tokenizer.eos_token=</s>
-            tokenizer self.tokenizer.bos_token=<s>
-            Loaded Mistral 7b model
-            <s>[INST]
-                    Who is Alpacona</s>
-                    [/INST]
-
-            Setting `pad_token_id` to `eos_token_id`:2 for open-end generation.
-
-                    1. Alpacona is a Brazilian singer and actress. She was born on July 1, 1990, in São Paulo, Brazil.
-            2. She began her career as a singer in 2008, when she participated in the reality show "Popstars 10" and finished in second place.
-            3. Since then, she has released several albums and singles, including "Olhos de Gelo" (2010), "O Que Eu Quero" (2012), and "O Que Eu Quero" (2014).
-            4. She has also appeared in several TV shows and movies, including "A Família Serrada" (2011), "O Que Eu Quero" (2012), and "O Que Eu Quero" (2014).
-            5. She is known for her catchy pop songs and her energetic performances on stage.
-            """
-    
-        prompt_template=f'''<s>[INST] 
-        {prompt}
-        [/INST]'''
+        """   
+        prompt_template=f'''<s>[INST]{sample_prompt}[/INST]
+        {sample_response}</s>
+        [INST]{prompt}[/INST]
+        '''
         #print(prompt_template)
         return prompt_template
 
