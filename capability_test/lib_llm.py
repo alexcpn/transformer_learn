@@ -9,8 +9,7 @@ from transformers import (
 
 from accelerate import infer_auto_device_map ,init_empty_weights
 
-def parse_response_out (response):
-  return  re.findall(pattern, response, re.DOTALL)
+
 
 # def sliding_window(filename, window_size=200, overlap=50):
 #     with open(filename, 'r', encoding='utf-8') as file:
