@@ -14,3 +14,5 @@ capability_test/__pycache__/l**
 capability_test/llama2_7b_4bit_qa_generator_2.py
 capability_test/noc_qa_data2.txt
 data/story3.txt
+results/denoised/**
+
