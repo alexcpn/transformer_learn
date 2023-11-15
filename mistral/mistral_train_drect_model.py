@@ -10,12 +10,13 @@ import logging as log
 from datetime import datetime
 import torch._dynamo.config
 from torch.cuda.amp import autocast
-
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
     BitsAndBytesConfig,
 )
+from peft import LoraConfig, get_peft_model
+
 print(torch.__version__)
 #torch.set_float32_matmul_precision('high')
 torch.backends.cuda.matmul.allow_tf32 = True
@@ -108,14 +109,58 @@ device = torch.device('cuda:0')
 if bf16:
     torch_dtype=torch.bfloat16
 else:
-    torch_dtype=torch.float16, 
-    
+    torch_dtype=torch.float16
+
+log.info(f"Going to load the model {model_name_long} in 4 bit Quanitsed mode {bnb_config} ")
+# This works, this is training the qunatised model
 model = AutoModelForCausalLM.from_pretrained(
     model_name_long,
-    torch_dtype=torch_dtype 
+    torch_dtype=torch_dtype,
     quantization_config=bnb_config,
     device_map=device_map
 )
+
+log.info("Loaded model in 4 bit Quantised form")
+# lets us try LoRA also now 
+
+################################################################################
+# QLoRA parameters
+################################################################################
+
+# LoRA attention dimension
+lora_r = 64
+
+# Alpha parameter for LoRA scaling
+lora_alpha = 32 #16
+
+# Dropout probability for LoRA layers
+lora_dropout = 0.1
+
+
+# Load LoRA configuration
+lora_config = LoraConfig(
+    lora_alpha=lora_alpha,
+    lora_dropout=lora_dropout,
+    r=lora_r,
+    bias="none",
+    task_type="CAUSAL_LM",
+    target_modules=[
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj",
+        "lm_head",
+    ],
+
+)
+# Loss is not decreaing with this
+# log.info(f"Going to load the model {model_name_long} with LoRA  {lora_config} ")
+# model = get_peft_model(model, lora_config)
+# log.info("Loaded model with LoRA")
+
 t = torch.cuda.get_device_properties(0).total_memory
 r = torch.cuda.memory_reserved(0)
 a = torch.cuda.memory_allocated(0)
@@ -127,13 +172,13 @@ model.config.use_cache = False
 model.config.pretraining_tp = 1
 
 optimizer = torch.optim.Adam(model.parameters(), lr=3e-5) 
-log.info(f"tokenizer.model_max_length = {tokenizer.model_max_length}, Learning Rate ={lr}")
+log.info(f"tokenizer.model_max_length = {tokenizer.model_max_length}, Learning Rate =3e-5")
 # Set up the training parameters
 train_batch_size = 1
 block_size = int((len_train_data-1)/10)
 if len_train_data > tokenizer.model_max_length:
     block_size = int(tokenizer.model_max_length/8) # tokenizer.model_max_length=1024
-num_train_epochs = 60
+num_train_epochs = 100
 save_epochs = 20
 
 # Set the optimizer and learning rate scheduler
@@ -164,7 +209,7 @@ with autocast(dtype=torch.bfloat16):
             optimizer.zero_grad()
         # Save the model checkpoint every 10th
      
-        checkpoint_dir = f"./mistral-direct2/epoch-{epoch+1}-{time_hash}"
+        checkpoint_dir = f"./mistral-directcqlora/epoch-{epoch+1}-{time_hash}"
         average_epch_loss = epoch_loss/num_train_epochs
         if epoch % save_epochs ==0:
              #model.save_pretrained(checkpoint_dir)#ou are calling `ave_pretrained` on a 4-bit converted model. This is currently not supported
@@ -173,7 +218,7 @@ with autocast(dtype=torch.bfloat16):
                             attention_mask = test_prompt_encoded.attention_mask.to(device))
             test_answer = tokenizer.decode(test_output[0], skip_special_tokens=True)
             log.info(f"Over-fit check answer: Epoch {epoch} {test_answer}")
-            torch.save(model, checkpoint_dir) 
+            #torch.save(model, checkpoint_dir) # AttributeError: Can't pickle local object 'add_hook_to_module.<locals>.new_forward'
             torch.save(model.state_dict(), checkpoint_dir) 
             model.train()
             log.info(f"Epoch {epoch} complete. Loss: {average_epch_loss} saving {checkpoint_dir}")
@@ -181,7 +226,7 @@ with autocast(dtype=torch.bfloat16):
         log.info(f"Epoch {epoch} complete. Loss: {average_epch_loss}")
       
         #delete the previous save epoch
-        checkpoint_dir = f"./mistral-direct2/epoch-{epoch}-{time_hash}"
+        checkpoint_dir = f"./mistral-directcqlora/epoch-{epoch}-{time_hash}"
         try:
             shutil.rmtree(checkpoint_dir)
         except:
