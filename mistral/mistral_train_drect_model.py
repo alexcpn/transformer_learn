@@ -91,6 +91,9 @@ bnb_config = BitsAndBytesConfig(
     bnb_4bit_use_double_quant=use_nested_quant,
 )
 
+bf16 = False    
+fp16 = True
+
 # Check GPU compatibility with bfloat16
 if compute_dtype == torch.float16 and use_4bit:
     major, _ = torch.cuda.get_device_capability()
