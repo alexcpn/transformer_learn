@@ -13,10 +13,10 @@ import sys
 if len(sys.argv) > 1:
     argument = sys.argv[1]
     print(f"Argument received: {argument}")
-    trained_model_adapter = argument
+    trained_model_adapter = argument #"/home/nokiaop/alex/epoch5mistral"
 else:
     print("No argument provided.")
-    trained_model_adapter = "/home/nokiaop/alex/epoch5mistral"
+    trained_model_adapter = None
     
 print(f"Loading QLORA Mistral Trained Adapter files from {trained_model_adapter}")    
 
@@ -54,8 +54,9 @@ model = AutoModelForCausalLM.from_pretrained(
     device_map=device_map
 )
 
-state_dict = torch.load(trained_model_adapter)
-model.load_state_dict(state_dict)
+if trained_model_adapter is not None:
+    state_dict = torch.load(trained_model_adapter)
+    model.load_state_dict(state_dict)
 
 
 # Uncomment below for Loading the QLora trained model
