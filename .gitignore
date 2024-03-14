@@ -16,3 +16,4 @@ capability_test/noc_qa_data2.txt
 data/story3.txt
 results/denoised/**
 
+xinference.log
