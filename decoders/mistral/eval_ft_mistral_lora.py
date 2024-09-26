@@ -13,7 +13,7 @@ import sys
 if len(sys.argv) > 1:
     argument = sys.argv[1]
     print(f"Argument received: {argument}")
-    trained_model_adapter = argument #"/home/nokiaop/alex/epoch5mistral"
+    trained_model_adapter = argument #"/home/alex/epoch5mistral"
 else:
     print("No argument provided.")
     trained_model_adapter = None
@@ -38,7 +38,7 @@ tokenizer.padding_side = "right" # Fix weird overflow issue with fp16 training
 device_map = {"": 0}
 
 # Loading from a saved state_dict, 
-#  nokiaop@namsrv01:~/alex$ python eval_ft_mistral_lora.py mistral-direct/epoch-99-2023-11-14\ 05\:51\:34.180042
+# python eval_ft_mistral_lora.py mistral-direct/epoch-99-2023-11-14\ 05\:51\:34.180042
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
     bnb_4bit_quant_type= "nf4",

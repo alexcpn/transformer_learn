@@ -1,4 +1,4 @@
-__pycache__/utils.cpython-310.pyc
+*.pyc
 logs/*
 models/**
 data/cached_**
@@ -17,3 +17,10 @@ data/story3.txt
 results/denoised/**
 
 xinference.log
+mistral/__pycache__/utils.cpython-310.pyc
+*.log
+.cache/**
+llama2/SIFT_llama2_7b_4bit_QLora_QA_Trainand_Eval_2.ipynb
+llama31/hftoken
+token.pickle
+llama31/nokia_nsp_troubleshooting.txt
