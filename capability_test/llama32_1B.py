@@ -99,49 +99,19 @@ model = AutoModelForCausalLM.from_pretrained(
 
 )
 
+
 # prompt = "translate English to French the following text 'what do the 3 dots mean in math?' "  # «Que signifient les 3 points en mathématiques?»
 # prompt_template = create_prompt(prompt,system_message= "You are a helpful AI translator.Please translate if it is possible")
 # gpt_gen(tokenizer, model, prompt_template,device)
 
-prompt ="""
-# Load the model configuration and set output_hidden_states=True
-config = AutoConfig.from_pretrained(model_name_long)
-config.output_hidden_states = True  # Enable output of hidden states
+prompt ="""# https://www.itu.int/dms_pubrec/itu-r/rec/p/R-REC-P.452-16-201507-S!!PDF-E.pdf
+# [n.7]ITU-R P.452: Prediction procedure for the evaluation of interference between stations on
+# the surface of the Earth at frequencies above about 0.1 GHz (P.452-16 (07/2015)),
+# available at https://www.itu.int/rec/R-REC-P.452-16-201507-I/en
 
-tokenizer = AutoTokenizer.from_pretrained(model_name_long)
-model = AutoModelForCausalLM.from_pretrained(
-    model_name_long,
-    config=config,
-    torch_dtype=torch_dtype,
-    device_map=device_map,
-    #quantization_config=bnb_config,
-    trust_remote_code=True
-
-)
-# Prepare input
-text = "I went to the bank"
-inputs = tokenizer(text, return_tensors="pt")
-inputs.to(device)
-# Run inference to get hidden states
-with torch.no_grad():
-    outputs = model(**inputs)
-
-embedding1 = get_embedding(outputs,layer_idx=-1)
-
-text = "I swam to the bank"
-inputs = tokenizer(text, return_tensors="pt")
-inputs.to(device)
-# Run inference to get hidden states
-with torch.no_grad():
-    outputs = model(**inputs)
-
-embedding2 = get_embedding(outputs,layer_idx=-1)
-
-# Compute cosine similarity
-similarity = cosine_similarity(embedding1, embedding2)
-print(f"Cosine Similarity: {similarity}")
+assert  not (ap_clutter == 0)
 """
-prompt_template = create_prompt(prompt,"Write the next lines of code")
+prompt_template = create_prompt(prompt,"extract all methods and classes of the source code provided along with line numbers")
 gpt_gen(tokenizer, model, prompt_template,device)
 
 sys.exit(0)
