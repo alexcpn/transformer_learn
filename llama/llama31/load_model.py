@@ -41,10 +41,8 @@ class LLAMa2Quantised:
         # bitsandbytes parameters
         ################################################################################
 
-        # Activate 4-bit precision base model loading
-        use_4bit = True
         # Compute dtype for 4-bit base models
-        bnb_4bit_compute_dtype = "float16"
+        bnb_4bit_compute_dtype = "bfloat16"
         # Quantization type (fp4 or nf4)
         bnb_4bit_quant_type = "nf4"
         # Quantization type (fp4 or nf4)
@@ -101,7 +99,7 @@ class LLAMa2Quantised:
         # # # Load in 8 bit
         # self.model = AutoModelForCausalLM.from_pretrained(model_name, quantization_config=bnb_config,torch_dtype=torch.bfloat16,
         #                                             device_map=device_map)
-        config = AutoConfig.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct")
+        config = AutoConfig.from_pretrained(model_name)
         # # Load in 4 bit
 
         self.model = AutoModelForCausalLM.from_pretrained(pre_trained_model_path,config=config,
@@ -114,10 +112,8 @@ class LLAMa2Quantised:
         #torch.save(self.model.state_dict(), "4bit")
         # Load LLaMA tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
-        
         print('model_max_length:', self.tokenizer.model_max_length)
-        self.tokenizer.pad_token = self.tokenizer.eos_token
-        # self.tokenizer.padding_side = "right" # Fix weird overflow issue with fp16 training
+
 
     def create_prompt(self,question,system_message):
         """
@@ -153,8 +149,8 @@ class LLAMa2Quantised:
 
 if __name__ == '__main__':
     
-    model_name =  "meta-llama/Meta-Llama-3.1-8B-Instruct"
-    pretrained_model_path='/home/alex/llama3.1_trained//llama3-final/'
+    model_name =  "meta-llama/Llama-3.2-1B-Instruct"
+    pretrained_model_path='./saved_model/llama3-final'
     log.info(f"Going to load the {pretrained_model_path} for {model_name}...")
     llam2_4bit = LLAMa2Quantised(pretrained_model_path,model_name,q4bitA=True)
     log.info("Loaded model")

@@ -21,7 +21,9 @@ What is the role of cholestrol in the body
 
 if __name__ == "__main__":
     print("Going to load the llama2 7b model ...")
-    llam2_4bit = LLAMa2Q(model_name="meta-llama/Llama-2-7b-chat-hf",q4bitA=True)
+    #llam2_4bit = LLAMa2Q(model_name="meta-llama/Llama-2-7b-chat-hf",q4bitA=True)
+    llam2_4bit = LLAMa2Q(model_name="deepseek-ai/DeepSeek-R1-Distill-Llama-8B",q4bitA=True)
+    
     print("Loaded LLama2 7b model")
 
     prompt = f"{ usercontext}"

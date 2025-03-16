@@ -1,0 +1,10 @@
+  File "/home/alex/.local/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/alex/.local/lib/python3.10/site-packages/accelerate/hooks.py", line 170, in new_forward
+    output = module._old_forward(*args, **kwargs)
+  File "/home/alex/.local/lib/python3.10/site-packages/transformers/models/gemma3/modeling_gemma3.py", line 365, in forward
+    attn_output, attn_weights = attention_interface(
+  File "/home/alex/.local/lib/python3.10/site-packages/transformers/integrations/sdpa_attention.py", line 54, in sdpa_attention_forward
+    attn_output = torch.nn.functional.scaled_dot_product_attention(
+RuntimeError: Expected query, key, and value to have the same dtype, but got query.dtype: float key.dtype: c10::Half and value.dtype: c10::Half instead.
+

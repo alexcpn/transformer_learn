@@ -24,3 +24,9 @@ llama2/SIFT_llama2_7b_4bit_QLora_QA_Trainand_Eval_2.ipynb
 llama31/hftoken
 token.pickle
 llama31/nokia_nsp_troubleshooting.txt
+data/**
+llama3.2_trained/*
+nsp_generated_qa.csv
+results/*
+sk-8zfuydDtd8iWoxX58tE9T3BlbkFJCV5JtuOTM
+llama/llama31/hftoken

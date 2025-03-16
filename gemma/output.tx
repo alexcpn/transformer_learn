@@ -1,0 +1,11 @@
+
+Fist simple SFT training
+
+```
+  warnings.warn(
+Enter your text (Type 'E' on a new line to Enter or exit):
+who was Visgar?
+E
+Infer output ['who was Visgar? He was a captivating figure, a combination of the wisdom of an elder and the energy of a rejuvenated Jarkell. His name echoed through the halls of Pentiagon, and his stories had an allure that was hard to resist. But behind his tales hid a treacherous agenda. He sought to sow discord, to disrupt the balance that had been so recently threatened. And he had the power to do it. As he delved deeper, he uncovered the underbelly of Pentiagon. The secrets of his past and the alliances that had brought him here. And it was in this landscape that he found Draven. The bond between the two was immediate and intense. Draven, with his vision of a united world where science and magic coexisted, and with his charismatic if misguided leadership, had quickly won the hearts of the people of Pentiagon. And Visgar, with his tales of a vanished realm and the alliances that had led to its destruction, had also captured their imagination.']
+Enter your text (Type 'E' on a new line to Enter or exit):
+```
